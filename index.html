@@ -203,28 +203,61 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- COSTS -->
 <div class="pane" id="pane-costs">
-  <div class="banner green"><i class="ti ti-circle-check banner-icon"></i><div><div class="banner-title">First-time buyer with gifted deposit</div><div class="banner-text">Your father's gift qualifies you for full first-time buyer SDLT relief. Your solicitor will need a signed gifted deposit letter and proof of funds.</div></div></div>
+  <div class="banner green"><i class="ti ti-circle-check banner-icon"></i><div><div class="banner-title">First-time buyer with gifted deposit</div><div class="banner-text">Your mortgage covers as much as lenders will offer. Your father's gift covers the rest. You qualify for full first-time buyer SDLT relief.</div></div></div>
+
+  <div class="slbl">Lender offers — what each has said</div>
+  <div class="card" style="margin-bottom:1.25rem;">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;">Log each lender's Decision in Principle offer. The highest becomes your mortgage amount in the calculator below.</div>
+    <div id="lender-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end;" id="lender-add-row">
+      <div class="fld" style="margin:0;"><label>Lender name</label><input id="l-name" placeholder="Halifax, HSBC..."></div>
+      <div class="fld" style="margin:0;"><label>Max offer (£)</label><input id="l-amount" type="number" placeholder="250000"></div>
+      <div class="fld" style="margin:0;"><label>Rate (%)</label><input id="l-rate" type="number" step="0.1" placeholder="4.5"></div>
+      <button onclick="addLender()" style="padding:8px 14px;font-size:13px;font-weight:500;background:var(--text);color:var(--bg);border:none;border-radius:var(--r);cursor:pointer;white-space:nowrap;">+ Add</button>
+    </div>
+  </div>
+
+  <div class="slbl">Your buying power</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem;" id="buying-power"></div>
+
   <div class="slbl">Purchase calculator</div>
   <div class="card">
-    <div class="g2"><div class="fld"><label>Property price (£)</label><input id="c-price" type="number" value="475000" oninput="calcCosts()"></div><div class="fld"><label>Gift from father (£)</label><input id="c-gift" type="number" value="150000" oninput="calcCosts()"></div></div>
-    <div class="g2"><div class="fld"><label>Your own savings (£)</label><input id="c-savings" type="number" value="0" oninput="calcCosts()"></div><div class="fld"><label>Mortgage rate (%)</label><input id="c-rate" type="number" value="4.5" step="0.1" oninput="calcCosts()"></div></div>
-    <div class="g2"><div class="fld"><label>Mortgage term (years)</label><input id="c-term" type="number" value="25" oninput="calcCosts()"></div><div class="fld"><label>Survey type</label><select id="c-surv" onchange="calcCosts()"><option value="700">HomeBuyer Report (~£700)</option><option value="1200">Full structural (~£1,200)</option></select></div></div>
-    <div class="g2"><div class="fld"><label>Solicitor fees (£)</label><input id="c-sol" type="number" value="2500" oninput="calcCosts()"></div><div class="fld"><label>Other costs (£)</label><input id="c-other" type="number" value="1500" oninput="calcCosts()"></div></div>
+    <div style="font-size:12px;color:var(--text3);background:var(--bg2);border-radius:var(--r);padding:8px 10px;margin-bottom:14px;">The mortgage amount is set by your best lender offer above. Adjust father's contribution and property price to model different scenarios.</div>
+    <div class="g3">
+      <div class="fld"><label>Property price (£)</label><input id="c-price" type="number" value="475000" oninput="calcCosts()"></div>
+      <div class="fld"><label>Best mortgage offer (£)</label><input id="c-mortgage" type="number" value="250000" oninput="calcCosts()"></div>
+      <div class="fld"><label>Father's contribution (£)</label><input id="c-gift" type="number" value="225000" readonly style="background:var(--bg2);color:var(--text2);"></div>
+    </div>
+    <div class="g3">
+      <div class="fld"><label>Mortgage rate (%)</label><input id="c-rate" type="number" value="4.5" step="0.1" oninput="calcCosts()"></div>
+      <div class="fld"><label>Mortgage term (years)</label><input id="c-term" type="number" value="25" oninput="calcCosts()"></div>
+      <div class="fld"><label>Survey type</label><select id="c-surv" onchange="calcCosts()"><option value="700">HomeBuyer Report (~£700)</option><option value="1200">Full structural (~£1,200)</option></select></div>
+    </div>
+    <div class="g2">
+      <div class="fld"><label>Solicitor fees (£)</label><input id="c-sol" type="number" value="2500" oninput="calcCosts()"></div>
+      <div class="fld"><label>Other costs (£)</label><input id="c-other" type="number" value="1500" oninput="calcCosts()"></div>
+    </div>
   </div>
+
   <div class="slbl">Stamp duty — first-time buyer</div>
   <div class="card">
     <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">0% on first £425,000 · 5% on £425k–£625k · Standard rates above £625k</div>
     <div id="sdlt-breakdown"></div>
     <div style="border-top:0.5px solid var(--border);padding-top:10px;margin-top:4px;display:flex;justify-content:space-between;"><div style="font-size:13px;font-weight:500;">Total stamp duty</div><div id="sdlt-total" style="font-size:20px;font-weight:500;"></div></div>
   </div>
+
   <div class="slbl">Upfront costs</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;" id="cost-summary"></div>
-  <div class="slbl">Deposit & mortgage</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem;" id="mortgage-summary"></div>
   <div class="slbl">Monthly outgoings</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem;" id="monthly-summary"></div>
-  <div class="card">
+
+  <div class="card" style="margin-bottom:1.25rem;">
     <div style="font-size:13px;font-weight:500;margin-bottom:12px;">Lodger income offset</div>
-    <div class="g2" style="align-items:end;"><div class="fld" style="margin:0;"><label>Room rent (£/mo)</label><input id="c-room" type="number" value="900" oninput="calcCosts()"></div><div><div style="font-size:12px;color:var(--text2);margin-bottom:4px;">Net monthly cost</div><div id="net-cost" style="font-size:22px;font-weight:500;"></div></div></div>
+    <div class="g2" style="align-items:end;">
+      <div class="fld" style="margin:0;"><label>Room rent (£/mo)</label><input id="c-room" type="number" value="900" oninput="calcCosts()"></div>
+      <div><div style="font-size:12px;color:var(--text2);margin-bottom:4px;">Net monthly cost</div><div id="net-cost" style="font-size:22px;font-weight:500;"></div></div>
+    </div>
     <div style="margin-top:10px;font-size:12px;color:var(--text3);">Rent-a-Room relief: earn up to £7,500/yr tax-free from a lodger.</div>
   </div>
+
   <div class="slbl">Gifted deposit checklist</div>
   <div class="card"><div style="font-size:13px;color:var(--text2);margin-bottom:12px;">Tick off as you gather each document.</div><div style="display:flex;flex-direction:column;gap:6px;" id="gift-checks"></div></div>
 </div>
@@ -362,7 +395,7 @@ function init(){
     d.onclick=()=>d.classList.toggle('on');
     gc.appendChild(d);
   });
-  buildGlossary();calcCosts();loadFromCloud();
+  buildGlossary();renderLenders();calcCosts();loadFromCloud();
 }
 
 function setScore(k,v){
@@ -386,6 +419,65 @@ function updateScoreBar(){
 function calcPPSF(){const p=parseFloat(document.getElementById('f-price').value),s=parseFloat(document.getElementById('f-sqft').value);document.getElementById('f-ppsf').value=(p&&s)?'£'+Math.round(p/s):'';}
 function handlePhotos(e){Array.from(e.target.files).forEach(file=>{const r=new FileReader();r.onload=ev=>{sessionPhotos.push({dataUrl:ev.target.result});renderPhotoGrid();};r.readAsDataURL(file);});e.target.value='';}
 function renderPhotoGrid(){const grid=document.getElementById('photo-grid');grid.innerHTML='';sessionPhotos.forEach((p,i)=>{const d=document.createElement('div');d.className='photo-thumb';d.innerHTML=`<img src="${p.dataUrl}"><button class="photo-del" onclick="sessionPhotos.splice(${i},1);renderPhotoGrid()">&#10005;</button>`;grid.appendChild(d);});}
+// ─── LENDER TRACKER ───
+let lenders = JSON.parse(localStorage.getItem('lenders') || '[]');
+
+function saveLenders() {
+  localStorage.setItem('lenders', JSON.stringify(lenders));
+}
+
+function addLender() {
+  const name = document.getElementById('l-name').value.trim();
+  const amount = parseFloat(document.getElementById('l-amount').value);
+  const rate = parseFloat(document.getElementById('l-rate').value);
+  if (!name || !amount) { alert('Please enter at least a lender name and offer amount'); return; }
+  lenders.push({ id: Date.now(), name, amount, rate: rate || null });
+  saveLenders();
+  document.getElementById('l-name').value = '';
+  document.getElementById('l-amount').value = '';
+  document.getElementById('l-rate').value = '';
+  renderLenders();
+  calcCosts();
+}
+
+function deleteLender(id) {
+  lenders = lenders.filter(l => l.id !== id);
+  saveLenders();
+  renderLenders();
+  calcCosts();
+}
+
+function renderLenders() {
+  const list = document.getElementById('lender-list');
+  if (!lenders.length) { list.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px;">No lenders added yet</div>'; return; }
+  const best = Math.max(...lenders.map(l => l.amount));
+  list.innerHTML = '';
+  [...lenders].sort((a,b) => b.amount - a.amount).forEach(l => {
+    const isBest = l.amount === best;
+    const d = document.createElement('div');
+    d.style.cssText = `display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);border:0.5px solid ${isBest ? 'var(--green-border)' : 'var(--border)'};background:${isBest ? 'var(--green-bg)' : 'var(--bg2)'};`;
+    d.innerHTML = `<div style="flex:1;"><div style="font-size:13px;font-weight:500;color:${isBest ? 'var(--green-text)' : 'var(--text)'};">${l.name}${isBest ? ' <span style="font-size:10px;background:var(--green-text);color:white;padding:2px 6px;border-radius:10px;margin-left:4px;">BEST</span>' : ''}</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">${l.rate ? l.rate + '% rate' : 'Rate not noted'}</div></div><div style="font-size:16px;font-weight:500;color:${isBest ? 'var(--green-text)' : 'var(--text)'};">£${Math.round(l.amount).toLocaleString()}</div><button onclick="deleteLender(${l.id})" style="padding:4px 8px;font-size:11px;color:var(--text3);border:0.5px solid var(--border);border-radius:var(--r);background:transparent;cursor:pointer;">✕</button>`;
+    list.appendChild(d);
+  });
+  // Auto-fill best mortgage into calculator
+  const bestLender = lenders.reduce((a, b) => b.amount > a.amount ? b : a, lenders[0]);
+  document.getElementById('c-mortgage').value = bestLender.amount;
+  if (bestLender.rate) document.getElementById('c-rate').value = bestLender.rate;
+  updateBuyingPower(best);
+}
+
+function updateBuyingPower(bestMortgage) {
+  const gift = parseFloat(document.getElementById('c-gift').value) || 0;
+  const price = parseFloat(document.getElementById('c-price').value) || 0;
+  const maxPrice = bestMortgage + gift;
+  const bp = document.getElementById('buying-power');
+  bp.innerHTML = [
+    {l:'Best mortgage offer',v:'£'+Math.round(bestMortgage).toLocaleString(),s:'from '+lenders.length+' lender'+(lenders.length>1?'s':'')},
+    {l:"Father's contribution",v:'£'+Math.round(gift).toLocaleString(),s:'covers the rest'},
+    {l:'Max property price',v:'£'+Math.round(maxPrice).toLocaleString(),s:price>maxPrice?'⚠️ over budget':'✓ within budget'}
+  ].map(x=>`<div class="mcard"><div class="ml">${x.l}</div><div class="mv">${x.v}</div><div class="ms">${x.s}</div></div>`).join('');
+}
+
 function calcSDLT(price){
   if(price<=425000)return{bands:[{l:'£0–£425,000',r:'0%',t:0}],total:0};
   if(price<=625000){const tax=Math.round((price-425000)*0.05);return{bands:[{l:'£0–£425,000',r:'0%',t:0},{l:'£425,001–£'+price.toLocaleString(),r:'5%',t:tax}],total:tax};}
@@ -397,17 +489,22 @@ function calcSDLT(price){
 }
 function fmt(n){return'£'+Math.round(n).toLocaleString();}
 function calcCosts(){
-  const price=parseFloat(document.getElementById('c-price').value)||475000,gift=parseFloat(document.getElementById('c-gift').value)||0,savings=parseFloat(document.getElementById('c-savings').value)||0,rate=parseFloat(document.getElementById('c-rate').value)||4.5,term=parseFloat(document.getElementById('c-term').value)||25,sol=parseFloat(document.getElementById('c-sol').value)||2500,surv=parseFloat(document.getElementById('c-surv').value)||700,other=parseFloat(document.getElementById('c-other').value)||1500,room=parseFloat(document.getElementById('c-room').value)||900;
-  const deposit=gift+savings,loan=Math.max(price-deposit,0),mr=rate/100/12,n=term*12;
+  const price=parseFloat(document.getElementById('c-price').value)||475000,rate=parseFloat(document.getElementById('c-rate').value)||4.5,term=parseFloat(document.getElementById('c-term').value)||25,sol=parseFloat(document.getElementById('c-sol').value)||2500,surv=parseFloat(document.getElementById('c-surv').value)||700,other=parseFloat(document.getElementById('c-other').value)||1500,room=parseFloat(document.getElementById('c-room').value)||900;
+  const mortgage=parseFloat(document.getElementById('c-mortgage').value)||0;
+  const giftAmt=Math.max(price-mortgage,0);
+  document.getElementById('c-gift').value=giftAmt;
+  const loan=mortgage,mr=rate/100/12,n=term*12;
   const monthly=loan>0?(mr?Math.round(loan*(mr*Math.pow(1+mr,n))/(Math.pow(1+mr,n)-1)):Math.round(loan/n)):0;
   const ltv=price>0?Math.round((loan/price)*100):0,sdlt=calcSDLT(price);
+  updateBuyingPower(mortgage);
   const bd=document.getElementById('sdlt-breakdown');bd.innerHTML='';
   if(sdlt.warn)bd.innerHTML+=`<div style="font-size:12px;background:var(--amber-bg);color:var(--amber-text);padding:7px 10px;border-radius:var(--r);margin-bottom:8px;">Above £625,000 — first-time buyer relief is lost</div>`;
   sdlt.bands.forEach(b=>{bd.innerHTML+=`<div class="sdlt-band-row"><span style="color:var(--text2);">${b.l}</span><span style="color:var(--text3);margin:0 8px;">${b.r}</span><span style="font-weight:500;">${fmt(b.t)}</span></div>`;});
   document.getElementById('sdlt-total').textContent=fmt(sdlt.total);
   const totalUp=sdlt.total+sol+surv+other;
-  document.getElementById('cost-summary').innerHTML=[{l:'Stamp duty',v:fmt(sdlt.total)},{l:'Solicitor fees',v:fmt(sol)},{l:'Survey',v:fmt(surv)},{l:'Other costs',v:fmt(other)},{l:'Total excl. deposit',v:fmt(totalUp)},{l:'Total cash needed',v:fmt(totalUp+deposit)}].map(x=>`<div class="mcard"><div class="ml">${x.l}</div><div class="mv">${x.v}</div></div>`).join('');
-  document.getElementById('mortgage-summary').innerHTML=[{l:'Total deposit',v:fmt(deposit),s:`Gift ${fmt(gift)} + savings ${fmt(savings)}`},{l:'Mortgage',v:fmt(loan),s:`${ltv}% LTV`},{l:'Monthly payment',v:fmt(monthly),s:`${rate}% over ${term}yrs`}].map(x=>`<div class="mcard"><div class="ml">${x.l}</div><div class="mv">${x.v}</div><div class="ms">${x.s}</div></div>`).join('');
+  const giftVal=Math.max(price-loan,0);
+  document.getElementById('cost-summary').innerHTML=[{l:'Stamp duty',v:fmt(sdlt.total)},{l:'Solicitor fees',v:fmt(sol)},{l:'Survey',v:fmt(surv)},{l:'Other costs',v:fmt(other)},{l:'Total excl. deposit',v:fmt(totalUp)},{l:'Total cash needed',v:fmt(totalUp+giftVal+loan)}].map(x=>`<div class="mcard"><div class="ml">${x.l}</div><div class="mv">${x.v}</div></div>`).join('');
+  // mortgage summary removed — replaced by buying power section
   document.getElementById('monthly-summary').innerHTML=[{l:'Mortgage',v:fmt(monthly)},{l:'Service charge',v:'Varies',s:'check per flat'},{l:'Bills est.',v:'~£150'}].map(x=>`<div class="mcard"><div class="ml">${x.l}</div><div class="mv">${x.v}</div>${x.s?`<div class="ms">${x.s}</div>`:''}</div>`).join('');
   document.getElementById('net-cost').textContent=fmt(monthly-room)+'/mo';
 }
