@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>London Flat Tracker</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -32,7 +33,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .app-wrap{max-width:720px;margin:0 auto;padding:1rem;}
 .nav{background:var(--bg);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100;padding:0 1rem;}
 .nav-inner{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;}
-.nav-brand{font-size:15px;font-weight:500;color:var(--text);}
+.nav-brand{font-size:15px;font-weight:500;}
 .nav-brand span{font-size:12px;color:var(--text3);margin-left:6px;}
 .sync-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);}
@@ -94,7 +95,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .photo-thumb img{width:100%;height:100%;object-fit:cover;}
 .photo-del{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);border:none;cursor:pointer;color:white;font-size:11px;display:flex;align-items:center;justify-content:center;}
 .gloss-cat{margin-bottom:1.5rem;}
-.gloss-cat-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px;padding-bottom:6px;border-bottom:0.5px solid var(--border);}
+.gloss-cat-title{font-size:13px;font-weight:500;margin-bottom:8px;padding-bottom:6px;border-bottom:0.5px solid var(--border);}
 .gloss-item{padding:10px 0;border-bottom:0.5px solid var(--border);}
 .gloss-item:last-child{border-bottom:none;}
 .gloss-term{font-size:14px;font-weight:500;margin-bottom:3px;}
@@ -130,7 +131,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .empty-state i{font-size:36px;display:block;margin-bottom:12px;color:var(--text3);}
 .empty-state h3{font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px;}
 .empty-state p{font-size:13px;}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:var(--rl);font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.2s;pointer-events:none;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:var(--rl);font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
 @media(max-width:520px){
   .g2,.g3{grid-template-columns:1fr;}
@@ -175,7 +176,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="score-num" id="snum">—</div>
     <div class="verdict-pill" id="sverdict">/10</div>
   </div>
-
   <div class="slbl">Property basics</div>
   <div class="card">
     <div class="g2">
@@ -202,7 +202,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="fld"><label>Heating type</label><input id="f-heat" placeholder="Gas central"></div>
     </div>
   </div>
-
   <div class="slbl">Leasehold & costs</div>
   <div class="card">
     <div class="g2">
@@ -223,17 +222,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="fld"><label>Major works planned?</label><div class="tlr" id="tl-mw"></div></div>
     </div>
   </div>
-
   <div class="slbl">Score this flat</div>
   <div class="card">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="score-grid"></div>
   </div>
-
   <div class="slbl">Checklist — tap items you confirmed</div>
   <div class="card">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="chk-grid"></div>
   </div>
-
   <div class="slbl">Practical flags</div>
   <div class="card">
     <div class="g2">
@@ -254,7 +250,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="fld"><label>Internet / signal?</label><div class="tlr" id="tl-net"></div></div>
     </div>
   </div>
-
   <div class="slbl">Seller & agent</div>
   <div class="card">
     <div class="g2">
@@ -271,7 +266,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div class="fld"><label>Link to listing</label><input id="f-lnk" placeholder="https://rightmove.co.uk/..."></div>
   </div>
-
   <div class="slbl">Photos</div>
   <div class="card">
     <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
@@ -281,9 +275,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <input type="file" id="photo-input" accept="image/*" multiple style="display:none;" onchange="handlePhotos(event)">
     <div class="photo-grid" id="photo-grid"></div>
-    <div style="font-size:12px;color:var(--text3);background:var(--bg2);border-radius:var(--r);padding:8px 10px;margin-top:8px;"><i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>Photos are stored for this session. For permanent photo storage, use a shared album (Google Photos, iCloud) and paste the link in the listing field.</div>
+    <div style="font-size:12px;color:var(--text3);background:var(--bg2);border-radius:var(--r);padding:8px 10px;margin-top:8px;"><i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>Photos are stored for this session. For permanent photos, paste a Google Photos or iCloud shared album link in the listing field.</div>
   </div>
-
   <div class="slbl">Your notes</div>
   <div class="card">
     <div class="fld"><label>First impression</label><textarea id="f-imp" placeholder="Walk-in feeling — what hit you first?"></textarea></div>
@@ -294,7 +287,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="fld"><label>Repairs / concerns</label><textarea id="f-rep" placeholder="Damp, old boiler, cracked ceiling..."></textarea></div>
     <div class="fld"><label>Gut feeling</label><textarea id="f-gut" placeholder="Could you imagine living here?"></textarea></div>
   </div>
-
   <div class="btn-row">
     <button class="btn-primary" id="save-btn" onclick="saveFlat()">Save viewing</button>
     <button class="btn-secondary" onclick="clearForm()">Clear</button>
@@ -303,11 +295,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- VIEWINGS -->
 <div class="pane" id="pane-viewings">
-  <div id="vw-empty" class="empty-state">
-    <i class="ti ti-building"></i>
-    <h3>No viewings saved yet</h3>
-    <p>Log your first viewing using the New viewing tab</p>
-  </div>
+  <div id="vw-empty" class="empty-state"><i class="ti ti-building"></i><h3>No viewings saved yet</h3><p>Log your first viewing using the New viewing tab</p></div>
   <div id="vw-list" style="display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
       <div class="slbl" style="margin:0;">All viewings</div>
@@ -349,7 +337,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="card">
     <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">0% on first £425,000 · 5% on £425k–£625k · Standard rates above £625k</div>
     <div id="sdlt-breakdown"></div>
-    <div style="border-top:0.5px solid var(--border);padding-top:10px;margin-top:4px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="border-top:0.5px solid var(--border);padding-top:10px;margin-top:4px;display:flex;justify-content:space-between;">
       <div style="font-size:13px;font-weight:500;">Total stamp duty</div>
       <div id="sdlt-total" style="font-size:20px;font-weight:500;"></div>
     </div>
@@ -407,12 +395,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPABASE_URL='https://vbfdlqxyvrkqffmdzwvd.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiZmRscXh5dnJrcWZmbWR6d3ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0OTI1MjMsImV4cCI6MjA5NTA2ODUyM30.wKEnq3-9w6TUMrxValKecnCM6_w4d9ZnsyWy8FnXIbI';
+// ─── SUPABASE INIT (JS client — handles CORS automatically) ───
+const { createClient } = supabase;
+const sb = createClient(
+  'https://vbfdlqxyvrkqffmdzwvd.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiZmRscXh5dnJrcWZmbWR6d3ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0OTI1MjMsImV4cCI6MjA5NTA2ODUyM30.wKEnq3-9w6TUMrxValKecnCM6_w4d9ZnsyWy8FnXIbI'
+);
 
 const SCORE_KEYS=[['light','Natural light'],['space','Space & layout'],['condition','Condition'],['noise','Noise level'],['location','Location & transport'],['value','Value for money'],['building','Building quality'],['gut','Gut feeling']];
 const CHECKS=['Lease years confirmed','Service charge amount','Reserve fund exists','Major works asked','EWS1/cladding checked','Boiler age checked','Damp/mould inspection','Cracks or leaks checked','Sound insulation tested','Natural light assessed','Storage measured','Ventilation checked','Seller reason asked','Time on market checked','Price reductions checked','Chain status confirmed','Area at night considered','Commute timed'];
@@ -424,7 +415,7 @@ const GIFT_CHECKS=[
   {t:'Proof of relationship',s:'Some lenders require evidence you are related'},
   {t:'International transfer documentation',s:'SWIFT/wire transfer records'},
   {t:'Indian FEMA/RBI compliance confirmed',s:'Transfer must be within LRS limits (~$250,000/yr)'},
-  {t:'Funds in your UK account',s:'Some lenders want funds received 30+ days before completion'},
+  {t:'Funds in your UK account 30+ days before completion',s:'Some lenders require this'},
   {t:'Solicitor informed of gift source',s:'Required for AML obligations'}
 ];
 const GLOSSARY=[
@@ -453,88 +444,84 @@ const GLOSSARY=[
     {t:'Freehold',d:'You own the property and land outright, forever. Common for houses, rare for flats. No lease, no ground rent, no freeholder.'},
     {t:'Share of freehold',d:'You own a leasehold flat but also jointly own the freehold with other flat owners. Best of both — you can extend the lease cheaply and control the building.'},
     {t:'Lease extension',d:'Adding years to a leasehold. You have a legal right to extend by 90 years. Below 80 years remaining, costs rise sharply. Below 70 years, many lenders refuse to mortgage.'},
-    {t:'Ground rent',d:'Annual fee paid by the leaseholder to the freeholder. Since 2022, new leases cannot charge more than a peppercorn (essentially zero). Older leases may have escalating ground rents — check carefully.'},
-    {t:'Service charge',d:'Annual fee covering maintenance, repairs, and management of shared areas. Always ask for the last 3 years of accounts and check for upcoming major works.'},
-    {t:'Sinking fund / reserve fund',d:'Money set aside for future major repairs (roof, lift). A healthy fund protects leaseholders from large unexpected bills.'},
+    {t:'Ground rent',d:'Annual fee paid to the freeholder. Since 2022, new leases cannot charge more than a peppercorn. Older leases may have escalating ground rents — check carefully.'},
+    {t:'Service charge',d:'Annual fee covering maintenance and management of shared areas. Always ask for the last 3 years of accounts and check for upcoming major works.'},
+    {t:'Sinking fund / reserve fund',d:'Money set aside for future major repairs. A healthy fund protects leaseholders from large unexpected bills.'},
     {t:'Section 20 notice',d:'Legal notice served on leaseholders when major works over £250 per flat are planned. Gives you the right to consult on costs. Always ask if one has been or will be issued.'},
   ]},
   {cat:'Fire safety & cladding',tag:'Safety',items:[
-    {t:'EWS1 form',d:'External Wall System assessment — certifies whether a building\'s external walls are safe or need remediation. Required by most lenders for flats in buildings over 11m tall. Without it the flat may be unmortgageable.'},
+    {t:'EWS1 form',d:'External Wall System assessment — certifies whether a building\'s external walls are safe. Required by most lenders for flats in buildings over 11m tall. Without it the flat may be unmortgageable.'},
     {t:'Cladding',d:'External panels on a building facade. Certain types (e.g. ACM cladding like Grenfell Tower) are a fire risk. Always check cladding status on any high-rise or post-war building.'},
-    {t:'Building Safety Act 2022',d:'Legislation requiring building owners to remediate unsafe cladding, with costs generally not passed to leaseholders for buildings over 11m. Check if the building is registered.'},
+    {t:'Building Safety Act 2022',d:'Requires building owners to remediate unsafe cladding, with costs generally not passed to leaseholders for buildings over 11m.'},
     {t:'Remediation',d:'Fixing unsafe cladding or fire safety defects. Can take years and may affect the building\'s insurance and mortgageability during the process.'},
   ]},
   {cat:'Surveys & condition',tag:'Survey',items:[
     {t:'HomeBuyer Report (Level 2)',d:'The most common survey for flats. A visual inspection identifying defects and risks. Costs ~£500–£900. Sufficient for most modern or well-maintained flats.'},
-    {t:'Full structural survey (Level 3)',d:'More comprehensive — structural analysis, roof inspection, detailed condition report. Costs ~£1,000–£1,500. Recommended for older buildings or if the HomeBuyer report flags concerns.'},
+    {t:'Full structural survey (Level 3)',d:'More comprehensive — structural analysis and detailed condition report. Costs ~£1,000–£1,500. Recommended for older buildings or if the HomeBuyer report flags concerns.'},
     {t:'Mortgage valuation',d:'The lender\'s assessment of the property value — done to protect the lender, not you. Does not replace a proper survey.'},
     {t:'Damp',d:'Common in older buildings. Can be rising damp, penetrating damp, or condensation. Look for tide marks, peeling paint, musty smells. Can be expensive to fix.'},
-    {t:'Subsidence',d:'When the ground beneath a property sinks causing structural movement. Signs include diagonal cracks, sticking doors. Potentially very costly. Check for past subsidence insurance claims.'},
+    {t:'Subsidence',d:'When the ground beneath a property sinks causing structural movement. Signs include diagonal cracks, sticking doors. Potentially very costly.'},
   ]},
   {cat:'Costs & tax',tag:'Costs',items:[
-    {t:'Stamp duty land tax (SDLT)',d:'Tax on property purchases in England. As a first-time buyer purchasing alone: 0% on first £425,000, 5% on £425,001–£625,000. No relief above £625,000. Must be paid within 14 days of completion.'},
+    {t:'Stamp duty land tax (SDLT)',d:'Tax on property purchases. As a first-time buyer purchasing alone: 0% on first £425,000, 5% on £425,001–£625,000. No relief above £625,000. Must be paid within 14 days of completion.'},
     {t:'First-time buyer relief',d:'Reduction in SDLT. Only applies if you have never owned residential property anywhere in the world, and the property costs £625,000 or less.'},
-    {t:'Solicitor / conveyancing fees',d:'Typically £1,500–£3,500 for a leasehold flat in London. Leasehold costs more than freehold. Get at least three quotes.'},
-    {t:'Land Registry fee',d:'Fee to register new ownership at HM Land Registry. Scales with purchase price — typically £135–£295. Your solicitor handles this.'},
+    {t:'Solicitor / conveyancing fees',d:'Typically £1,500–£3,500 for a leasehold flat in London. Get at least three quotes.'},
+    {t:'Land Registry fee',d:'Fee to register new ownership. Scales with purchase price — typically £135–£295. Your solicitor handles this.'},
     {t:'Buildings insurance',d:'For a flat, usually arranged by the freeholder and included in service charge. Contents insurance is separate and your responsibility.'},
   ]},
   {cat:'Making an offer',tag:'Offer',items:[
     {t:'Asking price',d:'The listed price. In London, flats often sell at or above asking in competitive areas. Research recent sold prices on Rightmove or Land Registry before bidding.'},
-    {t:'Offer subject to contract (STC)',d:'An accepted offer is not legally binding until exchange. Either party can still pull out — so always move quickly.'},
-    {t:'Best and final offer',d:'All interested buyers submit their highest offer by a deadline. One chance — no negotiation. Research the market carefully before bidding.'},
-    {t:'Buyer strength',d:'How attractive you are beyond price. First-time buyers with a mortgage in principle, no chain, and a ready solicitor are considered strong buyers and can beat higher offers.'},
+    {t:'Offer subject to contract (STC)',d:'An accepted offer is not legally binding until exchange. Either party can still pull out.'},
+    {t:'Best and final offer',d:'All interested buyers submit their highest offer by a deadline. One chance — no negotiation.'},
+    {t:'Buyer strength',d:'How attractive you are beyond price. First-time buyers with a mortgage in principle, no chain, and a ready solicitor are considered strong and can beat higher offers.'},
   ]}
 ];
 const LONDON_AREAS={'E1':[305,215],'E2':[320,200],'E3':[345,195],'E14':[340,225],'E15':[355,190],'EC1':[285,200],'EC2':[295,205],'EC3':[300,215],'EC4':[285,210],'N1':[280,180],'N4':[265,160],'N7':[270,175],'N8':[265,150],'N16':[290,170],'NW1':[255,180],'NW3':[240,170],'NW5':[255,170],'NW6':[230,175],'NW8':[245,185],'SE1':[295,230],'SE5':[290,250],'SE8':[315,240],'SE10':[335,235],'SE11':[285,240],'SE15':[305,255],'SE16':[315,230],'SE17':[295,243],'SE22':[300,265],'SE23':[305,270],'SW1':[260,233],'SW2':[270,255],'SW3':[250,240],'SW4':[265,250],'SW6':[240,245],'SW7':[245,235],'SW8':[270,243],'SW9':[280,250],'SW10':[242,243],'SW11':[258,248],'SW12':[260,260],'W1':[258,205],'W2':[242,203],'W4':[210,225],'W6':[225,233],'W8':[240,223],'W9':[235,193],'W10':[228,203],'W11':[233,213],'W12':[220,223],'W14':[233,230],'WC1':[278,200],'WC2':[275,210]};
 
 let scores={},toggleVals={},checked=new Set(),sessionPhotos=[],flats=[],editingId=null;
 
-// ─── SUPABASE ───
-async function sbFetch(path,opts={}){
-  const res=await fetch(SUPABASE_URL+'/rest/v1/'+path,{
-    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})},
-    ...opts
-  });
-  if(!res.ok){const e=await res.text();throw new Error(e);}
-  const txt=await res.text();return txt?JSON.parse(txt):null;
-}
-
+// ─── SYNC ───
 function setSyncStatus(state,label){
-  const dot=document.getElementById('sync-dot'),lbl=document.getElementById('sync-label');
-  dot.className='sync-dot '+state;lbl.textContent=label;
+  document.getElementById('sync-dot').className='sync-dot '+state;
+  document.getElementById('sync-label').textContent=label;
+}
+function showToast(msg,dur=3000){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
 }
 
 async function loadFromCloud(){
   setSyncStatus('syncing','Loading...');
   try{
-    const rows=await sbFetch('viewings?select=id,data&order=id.asc');
-    flats=rows.map(r=>({...r.data,id:r.id}));
-    setSyncStatus('synced','Synced');
+    const {data,error}=await sb.from('viewings').select('id,data').order('id',{ascending:true});
+    if(error)throw error;
+    flats=data.map(r=>({...r.data,id:r.id}));
+    setSyncStatus('synced','Synced ✓');
     updateAll();
   }catch(e){
     setSyncStatus('error','Offline');
-    // fallback to localStorage
     try{flats=JSON.parse(localStorage.getItem('flt_backup')||'[]');}catch(_){}
     updateAll();
-    showToast('Cloud unavailable — using local backup');
+    showToast('Could not connect — using local backup');
   }
 }
 
 async function saveToCloud(flat){
-  const {id,...data}=flat;
+  const{id,...data}=flat;
   setSyncStatus('syncing','Saving...');
   try{
     if(editingId){
-      await sbFetch('viewings?id=eq.'+id,{method:'PATCH',body:JSON.stringify({data})});
+      const{error}=await sb.from('viewings').update({data}).eq('id',id);
+      if(error)throw error;
     }else{
-      await sbFetch('viewings',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify({id,data})});
+      const{error}=await sb.from('viewings').insert({id,data});
+      if(error)throw error;
     }
     setSyncStatus('synced','Saved ✓');
-    // also save backup
     try{localStorage.setItem('flt_backup',JSON.stringify(flats));}catch(_){}
   }catch(e){
     setSyncStatus('error','Save failed');
-    showToast('Could not save to cloud — check your connection');
+    showToast('Could not save — check your connection');
     throw e;
   }
 }
@@ -542,17 +529,13 @@ async function saveToCloud(flat){
 async function deleteFromCloud(id){
   setSyncStatus('syncing','Deleting...');
   try{
-    await sbFetch('viewings?id=eq.'+id,{method:'DELETE'});
-    setSyncStatus('synced','Synced');
+    const{error}=await sb.from('viewings').delete().eq('id',id);
+    if(error)throw error;
+    setSyncStatus('synced','Synced ✓');
   }catch(e){
     setSyncStatus('error','Delete failed');
-    showToast('Could not delete from cloud');
+    showToast('Could not delete — check your connection');
   }
-}
-
-function showToast(msg,dur=3000){
-  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),dur);
 }
 
 // ─── INIT ───
@@ -581,7 +564,7 @@ function init(){
     });
   });
   const gc=document.getElementById('gift-checks');
-  GIFT_CHECKS.forEach((item,i)=>{
+  GIFT_CHECKS.forEach((item)=>{
     const d=document.createElement('div');d.className='chki';
     d.innerHTML=`<div class="chkb">&#10003;</div><div><div style="font-size:13px;font-weight:500;">${item.t}</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">${item.s}</div></div>`;
     d.onclick=()=>d.classList.toggle('on');
@@ -590,7 +573,6 @@ function init(){
   buildGlossary();calcCosts();loadFromCloud();
 }
 
-// ─── SCORE ───
 function setScore(k,v){
   scores[k]=v;
   document.getElementById('sr-'+k).querySelectorAll('.star').forEach(s=>s.classList.toggle('on',parseInt(s.dataset.v)<=v));
@@ -610,15 +592,12 @@ function updateScoreBar(){
   const v=document.getElementById('sverdict');v.textContent=vt;v.style.background=bg;v.style.color=tc;
 }
 function calcPPSF(){const p=parseFloat(document.getElementById('f-price').value),s=parseFloat(document.getElementById('f-sqft').value);document.getElementById('f-ppsf').value=(p&&s)?'£'+Math.round(p/s):'';}
-
-// ─── PHOTOS ───
 function handlePhotos(e){
   Array.from(e.target.files).forEach(file=>{
     const reader=new FileReader();
-    reader.onload=ev=>{sessionPhotos.push({dataUrl:ev.target.result,name:file.name});renderPhotoGrid();};
+    reader.onload=ev=>{sessionPhotos.push({dataUrl:ev.target.result});renderPhotoGrid();};
     reader.readAsDataURL(file);
-  });
-  e.target.value='';
+  });e.target.value='';
 }
 function renderPhotoGrid(){
   const grid=document.getElementById('photo-grid');grid.innerHTML='';
@@ -628,11 +607,9 @@ function renderPhotoGrid(){
     grid.appendChild(d);
   });
 }
-
-// ─── COSTS ───
 function calcSDLT(price){
-  if(price<=425000)return{bands:[{l:'£0 – £425,000',r:'0%',t:0}],total:0};
-  if(price<=625000){const tax=Math.round((price-425000)*0.05);return{bands:[{l:'£0 – £425,000',r:'0%',t:0},{l:'£425,001 – £'+price.toLocaleString(),r:'5%',t:tax}],total:tax};}
+  if(price<=425000)return{bands:[{l:'£0–£425,000',r:'0%',t:0}],total:0};
+  if(price<=625000){const tax=Math.round((price-425000)*0.05);return{bands:[{l:'£0–£425,000',r:'0%',t:0},{l:'£425,001–£'+price.toLocaleString(),r:'5%',t:tax}],total:tax};}
   let t=0,bands=[];
   if(price>1500000){const c=price-1500000,tx=Math.round(c*0.12);t+=tx;bands.push({l:'Above £1,500,000',r:'12%',t:tx});}
   if(price>925000){const c=Math.min(price,1500000)-925000,tx=Math.round(c*0.10);t+=tx;bands.push({l:'£925,001–£1,500,000',r:'10%',t:tx});}
@@ -666,8 +643,6 @@ function calcCosts(){
   document.getElementById('monthly-summary').innerHTML=[{l:'Mortgage',v:fmt(monthly)},{l:'Service charge',v:'Varies',s:'check per flat'},{l:'Bills est.',v:'~£150'}].map(x=>`<div class="mcard"><div class="ml">${x.l}</div><div class="mv">${x.v}</div>${x.s?`<div class="ms">${x.s}</div>`:''}</div>`).join('');
   document.getElementById('net-cost').textContent=fmt(monthly-room)+'/mo';
 }
-
-// ─── SAVE / CLEAR ───
 function gv(id){return document.getElementById(id)?.value||'';}
 function computeScore(){
   const rated=SCORE_KEYS.map(x=>x[0]).filter(k=>scores[k]);
@@ -677,7 +652,6 @@ function computeScore(){
 async function saveFlat(){
   const addr=gv('f-addr');if(!addr){alert('Please enter an address');return;}
   const btn=document.getElementById('save-btn');btn.disabled=true;btn.textContent='Saving...';
-  const sc=computeScore();
   const flat={
     id:editingId||Date.now(),address:addr,date:gv('f-date'),price:gv('f-price'),sqft:gv('f-sqft'),ppsf:gv('f-ppsf'),
     beds:gv('f-beds'),baths:gv('f-baths'),floor:gv('f-floor'),station:gv('f-stn'),walk:gv('f-walk'),
@@ -686,17 +660,20 @@ async function saveFlat(){
     agent:gv('f-agt'),agentc:gv('f-agtc'),link:gv('f-lnk'),whysell:gv('f-why'),timemarket:gv('f-tom'),
     rentpot:gv('f-rp'),commute:gv('f-com'),mort:gv('f-mort'),
     impression:gv('f-imp'),pros:gv('f-pro'),cons:gv('f-con'),repairs:gv('f-rep'),guttext:gv('f-gut'),
-    scores:{...scores},toggles:{...toggleVals},checklist:[...checked],score:sc,photoCount:sessionPhotos.length
+    scores:{...scores},toggles:{...toggleVals},checklist:[...checked],score:computeScore(),photoCount:sessionPhotos.length
   };
   try{
     await saveToCloud(flat);
     if(editingId){flats=flats.map(x=>x.id===editingId?flat:x);}else{flats.push(flat);}
     editingId=null;updateAll();clearForm();showTab('viewings');showToast('Viewing saved ✓');
-  }catch(e){/* error already shown */}
-  btn.disabled=false;btn.textContent='Save viewing';
+  }catch(e){}
+  btn.disabled=false;btn.textContent=editingId?'Update viewing':'Save viewing';
 }
 function clearForm(){
-  document.querySelectorAll('#pane-form input,#pane-form select,#pane-form textarea').forEach(el=>{if(el.type==='date')el.value=new Date().toISOString().split('T')[0];else if(!el.readOnly)el.value='';});
+  document.querySelectorAll('#pane-form input,#pane-form select,#pane-form textarea').forEach(el=>{
+    if(el.type==='date')el.value=new Date().toISOString().split('T')[0];
+    else if(!el.readOnly)el.value='';
+  });
   document.getElementById('f-ppsf').value='';
   document.querySelectorAll('.tlb').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('#pane-form .chki').forEach(el=>el.classList.remove('on'));
@@ -722,11 +699,8 @@ async function deleteFlat(id,e){
   try{localStorage.setItem('flt_backup',JSON.stringify(flats));}catch(_){}
   updateAll();showToast('Viewing deleted');
 }
-
-// ─── RENDER ───
 function updateAll(){
-  const n=flats.length;
-  document.getElementById('vcnt').textContent=n?`(${n})`:'';
+  document.getElementById('vcnt').textContent=flats.length?`(${flats.length})`:'';
   updateViewings();updateCompare();
 }
 function scColor(s){
@@ -735,7 +709,6 @@ function scColor(s){
   return{bg:'var(--red-bg)',tc:'var(--red-text)'};
 }
 function di(label,val){if(!val)return'';return`<div class="detail-item"><div class="detail-label">${label}</div><div class="detail-val">${val}</div></div>`;}
-
 function updateViewings(){
   const empty=document.getElementById('vw-empty'),list=document.getElementById('vw-list');
   if(!flats.length){empty.style.display='block';list.style.display='none';return;}
@@ -755,14 +728,13 @@ function updateViewings(){
       <div class="viewing-card-body">
         <div style="padding-top:12px;">
           <div class="detail-grid">
-            ${di('Asking price',f.price?'£'+parseInt(f.price).toLocaleString():'')}
-            ${di('Price / sq ft',f.ppsf)}${di('Sq ft',f.sqft)}${di('Floor',f.floor)}
+            ${di('Asking price',price)}${di('Price/sqft',f.ppsf)}${di('Sq ft',f.sqft)}${di('Floor',f.floor)}
             ${di('Station',f.station+(f.walk?' · '+f.walk+'min':''))}${di('EPC',f.epc)}
             ${di('Council tax',f.ctax)}${di('Tenure',f.tenure)}${di('Lease years',f.lease)}
             ${di('Ground rent',f.grent?'£'+f.grent+'/yr':'')}
             ${di('Service charge',f.scharge?'£'+parseInt(f.scharge).toLocaleString()+'/yr':'')}
-            ${di('SC trend',f.sctrend)}${di('EWS1 / cladding',f.ews1)}${di('Agent',f.agent)}
-            ${di('Commute',f.commute?f.commute+'min':'')}${di('Photos taken',f.photoCount?f.photoCount+'':'')}
+            ${di('SC trend',f.sctrend)}${di('EWS1',f.ews1)}${di('Agent',f.agent)}
+            ${di('Commute',f.commute?f.commute+'min':'')}${di('Photos',f.photoCount?f.photoCount+'':'')}
           </div>
           ${f.impression?`<div class="note-block"><div class="note-label">First impression</div><div class="note-text">${f.impression}</div></div>`:''}
           ${f.pros?`<div class="note-block"><div class="note-label">Pros</div><div class="note-text">${f.pros}</div></div>`:''}
@@ -803,8 +775,6 @@ function exportCSV(){
   const rows=flats.map(f=>[f.address,f.date,f.price,f.sqft,f.ppsf,f.beds,f.baths,f.floor,f.station,f.walk,f.epc,f.ctax,f.heating,f.tenure,f.lease,f.grent,f.scharge,f.bills,f.sctrend,f.ews1,f.agent,f.agentc,f.link,f.whysell,f.timemarket,f.rentpot,f.commute,f.mort,f.score,f.impression,f.pros,f.cons,f.repairs,f.guttext,f.photoCount||0].map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"'));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([[h.map(x=>'"'+x+'"').join(','),...rows.map(r=>r.join(','))].join('\n')],{type:'text/csv'}));a.download='London_Flat_Viewings.csv';a.click();
 }
-
-// ─── MAP ───
 function getPostcode(addr){const m=addr.match(/\b([A-Z]{1,2}\d{1,2}[A-Z]?)\b/i);return m?m[1].toUpperCase():null;}
 function renderMap(){
   const empty=document.getElementById('map-empty'),wrap=document.getElementById('map-wrap');
@@ -827,8 +797,6 @@ function renderMap(){
     ml.innerHTML+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);"><span style="width:10px;height:10px;border-radius:50%;background:${fill};display:inline-block;"></span><div style="flex:1;font-size:13px;font-weight:500;">${area}</div><div style="font-size:12px;color:var(--text3);">${data.flats.length} viewing${data.flats.length>1?'s':''}</div><div style="font-size:13px;font-weight:500;">${avg?avg.toFixed(1):'—'}</div></div>`;
   });
 }
-
-// ─── GLOSSARY ───
 function buildGlossary(){
   const container=document.getElementById('gloss-content');
   GLOSSARY.forEach(cat=>{
@@ -847,8 +815,6 @@ function filterGlossary(q){
   document.querySelectorAll('.gloss-item').forEach(item=>item.style.display=(!query||item.dataset.term.includes(query))?'':'none');
   document.querySelectorAll('.gloss-cat').forEach(cat=>cat.style.display=Array.from(cat.querySelectorAll('.gloss-item')).some(x=>x.style.display!=='none')?'':'none');
 }
-
-// ─── NAV ───
 function showTab(t){
   document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
@@ -856,7 +822,6 @@ function showTab(t){
   document.getElementById('tab-'+t).classList.add('active');
   if(t==='map')renderMap();
 }
-
 init();
 </script>
 </body>
