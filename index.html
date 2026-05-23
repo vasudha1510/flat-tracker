@@ -5,30 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>London Flat Tracker</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#ffffff;--bg2:#f8f7f5;--bg3:#f1efe8;
-  --text:#1a1a18;--text2:#5f5e5a;--text3:#888780;
-  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
-  --green-bg:#eaf3de;--green-text:#3b6d11;--green-border:#c0dd97;
-  --amber-bg:#faeeda;--amber-text:#854f0b;--amber-border:#fac775;
-  --red-bg:#fcebeb;--red-text:#a32d2d;--red-border:#f7c1c1;
-  --blue-bg:#e6f1fb;--blue-text:#185fa5;--blue-border:#85b7eb;
-  --r:8px;--rl:12px;
-}
-@media(prefers-color-scheme:dark){
-  :root{
-    --bg:#1e1e1c;--bg2:#2a2a28;--bg3:#222220;
-    --text:#f0ede8;--text2:#a8a5a0;--text3:#6a6866;
-    --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
-    --green-bg:#1a2e0a;--green-text:#8fcc4a;--green-border:#3b6d11;
-    --amber-bg:#2e1f05;--amber-text:#f0a030;--amber-border:#854f0b;
-    --red-bg:#2e0f0f;--red-text:#f09090;--red-border:#a32d2d;
-    --blue-bg:#0c1e30;--blue-text:#6ab4f5;--blue-border:#185fa5;
-  }
-}
+:root{--bg:#ffffff;--bg2:#f8f7f5;--bg3:#f1efe8;--text:#1a1a18;--text2:#5f5e5a;--text3:#888780;--border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);--green-bg:#eaf3de;--green-text:#3b6d11;--green-border:#c0dd97;--amber-bg:#faeeda;--amber-text:#854f0b;--amber-border:#fac775;--red-bg:#fcebeb;--red-text:#a32d2d;--blue-text:#185fa5;--r:8px;--rl:12px;}
+@media(prefers-color-scheme:dark){:root{--bg:#1e1e1c;--bg2:#2a2a28;--bg3:#222220;--text:#f0ede8;--text2:#a8a5a0;--text3:#6a6866;--border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);--green-bg:#1a2e0a;--green-text:#8fcc4a;--green-border:#3b6d11;--amber-bg:#2e1f05;--amber-text:#f0a030;--amber-border:#854f0b;--red-bg:#2e0f0f;--red-text:#f09090;--blue-text:#6ab4f5;}}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:15px;line-height:1.5;min-height:100vh;}
 .app-wrap{max-width:720px;margin:0 auto;padding:1rem;}
 .nav{background:var(--bg);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100;padding:0 1rem;}
@@ -61,7 +41,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .fld input[readonly]{background:var(--bg2);color:var(--text2);}
 .tlr{display:flex;gap:5px;flex-wrap:wrap;}
 .tlb{padding:6px 12px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg2);font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);transition:all 0.12s;}
-.tlb:hover{border-color:var(--border2);}
 .tlb.on{background:var(--bg);border-color:var(--border2);color:var(--text);}
 .star-row{display:flex;gap:4px;}
 .star{width:28px;height:28px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.1s;color:var(--text3);}
@@ -74,11 +53,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .chki.on .chkb{background:var(--green-text);border-color:var(--green-text);color:white;}
 .score-bar-wrap{background:var(--bg2);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;}
 .score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
-.score-bar-fill{height:100%;border-radius:3px;transition:width 0.3s,background 0.3s;width:0%;background:#c0dd97;}
+.score-bar-fill{height:100%;border-radius:3px;transition:width 0.3s,background 0.3s;width:0%;}
 .score-num{font-size:28px;font-weight:500;min-width:44px;text-align:right;}
 .verdict-pill{font-size:12px;font-weight:500;padding:4px 10px;border-radius:var(--r);background:var(--bg);color:var(--text3);}
-.btn-primary{flex:1;padding:12px;font-size:15px;font-weight:500;background:var(--text);color:var(--bg);border:none;border-radius:var(--r);cursor:pointer;transition:opacity 0.15s;}
-.btn-primary:hover{opacity:0.85;}
+.btn-primary{flex:1;padding:12px;font-size:15px;font-weight:500;background:var(--text);color:var(--bg);border:none;border-radius:var(--r);cursor:pointer;}
 .btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
 .btn-secondary{padding:12px 18px;font-size:14px;border-radius:var(--r);cursor:pointer;border:0.5px solid var(--border);background:var(--bg);color:var(--text2);}
 .btn-row{display:flex;gap:10px;margin-bottom:1.5rem;}
@@ -88,12 +66,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mcard .ml{font-size:12px;color:var(--text2);margin-bottom:4px;}
 .mcard .mv{font-size:18px;font-weight:500;}
 .mcard .ms{font-size:11px;color:var(--text3);margin-top:3px;}
-.photo-upload-area{border:1.5px dashed var(--border2);border-radius:var(--rl);padding:2rem;text-align:center;cursor:pointer;transition:all 0.15s;background:var(--bg2);}
-.photo-upload-area:hover{border-color:var(--text3);background:var(--bg);}
+.photo-upload-area{border:1.5px dashed var(--border2);border-radius:var(--rl);padding:2rem;text-align:center;cursor:pointer;background:var(--bg2);}
 .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px;}
 .photo-thumb{position:relative;border-radius:var(--r);overflow:hidden;aspect-ratio:4/3;border:0.5px solid var(--border);}
 .photo-thumb img{width:100%;height:100%;object-fit:cover;}
-.photo-del{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);border:none;cursor:pointer;color:white;font-size:11px;display:flex;align-items:center;justify-content:center;}
+.photo-del{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);border:none;cursor:pointer;color:white;font-size:11px;}
 .gloss-cat{margin-bottom:1.5rem;}
 .gloss-cat-title{font-size:13px;font-weight:500;margin-bottom:8px;padding-bottom:6px;border-bottom:0.5px solid var(--border);}
 .gloss-item{padding:10px 0;border-bottom:0.5px solid var(--border);}
@@ -115,17 +92,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .note-text{font-size:13px;line-height:1.5;}
 .banner{border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:12px;align-items:flex-start;}
 .banner.green{background:var(--green-bg);border:0.5px solid var(--green-border);}
-.banner.amber{background:var(--amber-bg);border:0.5px solid var(--amber-border);}
-.banner-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
-.banner.green .banner-icon{color:var(--green-text);}
-.banner.amber .banner-icon{color:var(--amber-text);}
-.banner-title{font-size:13px;font-weight:500;margin-bottom:4px;}
-.banner.green .banner-title{color:#27500a;}
-.banner.amber .banner-title{color:#633806;}
-.banner-text{font-size:13px;line-height:1.6;}
-.banner.green .banner-text{color:var(--green-text);}
-.banner.amber .banner-text{color:var(--amber-text);}
-#london-map{width:100%;border:0.5px solid var(--border);border-radius:var(--rl);}
+.banner-icon{font-size:18px;flex-shrink:0;margin-top:1px;color:var(--green-text);}
+.banner-title{font-size:13px;font-weight:500;margin-bottom:4px;color:#27500a;}
+.banner-text{font-size:13px;line-height:1.6;color:var(--green-text);}
 .sdlt-band-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--border);}
 .empty-state{text-align:center;padding:3rem 1rem;color:var(--text2);}
 .empty-state i{font-size:36px;display:block;margin-bottom:12px;color:var(--text3);}
@@ -133,26 +102,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .empty-state p{font-size:13px;}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:var(--rl);font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
-@media(max-width:520px){
-  .g2,.g3{grid-template-columns:1fr;}
-  .detail-grid{grid-template-columns:1fr;}
-  .tabs{gap:4px;padding:8px;}
-  .tab{padding:6px 10px;font-size:12px;}
-}
+#london-map{width:100%;border:0.5px solid var(--border);border-radius:var(--rl);}
+@media(max-width:520px){.g2,.g3{grid-template-columns:1fr;}.detail-grid{grid-template-columns:1fr;}.tabs{gap:4px;padding:8px;}.tab{padding:6px 10px;font-size:12px;}}
 </style>
 </head>
 <body>
-
 <div class="nav">
   <div class="nav-inner">
     <div class="nav-brand">Flat tracker <span>London FTB</span></div>
-    <div class="sync-status">
-      <div class="sync-dot" id="sync-dot"></div>
-      <span id="sync-label">Connecting...</span>
-    </div>
+    <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Connecting...</span></div>
   </div>
 </div>
-
 <div class="tabs-scroll">
   <div class="tabs">
     <button class="tab active" onclick="showTab('form')" id="tab-form"><i class="ti ti-plus" style="font-size:13px;"></i> New viewing</button>
@@ -163,107 +123,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="tab" onclick="showTab('glossary')" id="tab-glossary">Glossary</button>
   </div>
 </div>
-
 <div class="app-wrap">
 
 <!-- FORM -->
 <div class="pane active" id="pane-form">
   <div class="score-bar-wrap">
-    <div style="flex:1;">
-      <div style="font-size:12px;color:var(--text2);margin-bottom:5px;">Overall score</div>
-      <div class="score-bar-track"><div class="score-bar-fill" id="sbar"></div></div>
-    </div>
+    <div style="flex:1;"><div style="font-size:12px;color:var(--text2);margin-bottom:5px;">Overall score</div><div class="score-bar-track"><div class="score-bar-fill" id="sbar"></div></div></div>
     <div class="score-num" id="snum">—</div>
     <div class="verdict-pill" id="sverdict">/10</div>
   </div>
   <div class="slbl">Property basics</div>
   <div class="card">
-    <div class="g2">
-      <div class="fld"><label>Address (include postcode)</label><input id="f-addr" type="text" placeholder="12 Bermondsey St, SE1 3UB"></div>
-      <div class="fld"><label>Date viewed</label><input id="f-date" type="date"></div>
-    </div>
-    <div class="g3">
-      <div class="fld"><label>Asking price (£)</label><input id="f-price" type="number" placeholder="475000" oninput="calcPPSF()"></div>
-      <div class="fld"><label>Sq ft</label><input id="f-sqft" type="number" placeholder="750" oninput="calcPPSF()"></div>
-      <div class="fld"><label>£ per sq ft</label><input id="f-ppsf" readonly></div>
-    </div>
-    <div class="g3">
-      <div class="fld"><label>Bedrooms</label><input id="f-beds" type="number" placeholder="2"></div>
-      <div class="fld"><label>Bathrooms</label><input id="f-baths" type="number" placeholder="2"></div>
-      <div class="fld"><label>Floor</label><input id="f-floor" placeholder="3rd"></div>
-    </div>
-    <div class="g2">
-      <div class="fld"><label>Nearest station</label><input id="f-stn" placeholder="London Bridge"></div>
-      <div class="fld"><label>Walk to station (mins)</label><input id="f-walk" type="number" placeholder="8"></div>
-    </div>
-    <div class="g3">
-      <div class="fld"><label>EPC rating</label><select id="f-epc"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
-      <div class="fld"><label>Council tax band</label><select id="f-ctax"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div>
-      <div class="fld"><label>Heating type</label><input id="f-heat" placeholder="Gas central"></div>
-    </div>
+    <div class="g2"><div class="fld"><label>Address (include postcode)</label><input id="f-addr" placeholder="12 Bermondsey St, SE1 3UB"></div><div class="fld"><label>Date viewed</label><input id="f-date" type="date"></div></div>
+    <div class="g3"><div class="fld"><label>Asking price (£)</label><input id="f-price" type="number" placeholder="475000" oninput="calcPPSF()"></div><div class="fld"><label>Sq ft</label><input id="f-sqft" type="number" placeholder="750" oninput="calcPPSF()"></div><div class="fld"><label>£ per sq ft</label><input id="f-ppsf" readonly></div></div>
+    <div class="g3"><div class="fld"><label>Bedrooms</label><input id="f-beds" type="number" placeholder="2"></div><div class="fld"><label>Bathrooms</label><input id="f-baths" type="number" placeholder="2"></div><div class="fld"><label>Floor</label><input id="f-floor" placeholder="3rd"></div></div>
+    <div class="g2"><div class="fld"><label>Nearest station</label><input id="f-stn" placeholder="London Bridge"></div><div class="fld"><label>Walk to station (mins)</label><input id="f-walk" type="number" placeholder="8"></div></div>
+    <div class="g3"><div class="fld"><label>EPC rating</label><select id="f-epc"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div><div class="fld"><label>Council tax band</label><select id="f-ctax"><option value="">—</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option><option>H</option></select></div><div class="fld"><label>Heating type</label><input id="f-heat" placeholder="Gas central"></div></div>
   </div>
   <div class="slbl">Leasehold & costs</div>
   <div class="card">
-    <div class="g2">
-      <div class="fld"><label>Tenure</label><select id="f-ten"><option value="">—</option><option>Leasehold</option><option>Share of freehold</option><option>Freehold</option></select></div>
-      <div class="fld"><label>Years remaining on lease</label><input id="f-lease" type="number" placeholder="125"></div>
-    </div>
-    <div class="g3">
-      <div class="fld"><label>Ground rent (£/yr)</label><input id="f-grent" type="number" placeholder="0"></div>
-      <div class="fld"><label>Service charge (£/yr)</label><input id="f-sc" type="number" placeholder="3000"></div>
-      <div class="fld"><label>Est. monthly bills (£)</label><input id="f-bills" type="number" placeholder="150"></div>
-    </div>
-    <div class="g2">
-      <div class="fld"><label>Service charge trend</label><select id="f-sct"><option value="">—</option><option>Stable</option><option>Rising slowly</option><option>Rising fast</option><option>Unknown</option></select></div>
-      <div class="fld"><label>EWS1 / cladding status</label><input id="f-ews" placeholder="Clear / Pending / N/A"></div>
-    </div>
-    <div class="g2">
-      <div class="fld"><label>Reserve / sinking fund?</label><div class="tlr" id="tl-res"></div></div>
-      <div class="fld"><label>Major works planned?</label><div class="tlr" id="tl-mw"></div></div>
-    </div>
+    <div class="g2"><div class="fld"><label>Tenure</label><select id="f-ten"><option value="">—</option><option>Leasehold</option><option>Share of freehold</option><option>Freehold</option></select></div><div class="fld"><label>Years remaining on lease</label><input id="f-lease" type="number" placeholder="125"></div></div>
+    <div class="g3"><div class="fld"><label>Ground rent (£/yr)</label><input id="f-grent" type="number" placeholder="0"></div><div class="fld"><label>Service charge (£/yr)</label><input id="f-sc" type="number" placeholder="3000"></div><div class="fld"><label>Est. monthly bills (£)</label><input id="f-bills" type="number" placeholder="150"></div></div>
+    <div class="g2"><div class="fld"><label>Service charge trend</label><select id="f-sct"><option value="">—</option><option>Stable</option><option>Rising slowly</option><option>Rising fast</option><option>Unknown</option></select></div><div class="fld"><label>EWS1 / cladding status</label><input id="f-ews" placeholder="Clear / Pending / N/A"></div></div>
+    <div class="g2"><div class="fld"><label>Reserve / sinking fund?</label><div class="tlr" id="tl-res"></div></div><div class="fld"><label>Major works planned?</label><div class="tlr" id="tl-mw"></div></div></div>
   </div>
   <div class="slbl">Score this flat</div>
-  <div class="card">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="score-grid"></div>
-  </div>
+  <div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="score-grid"></div></div>
   <div class="slbl">Checklist — tap items you confirmed</div>
-  <div class="card">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="chk-grid"></div>
-  </div>
+  <div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="chk-grid"></div></div>
   <div class="slbl">Practical flags</div>
   <div class="card">
-    <div class="g2">
-      <div class="fld"><label>Lodger-friendly layout?</label><div class="tlr" id="tl-lod"></div></div>
-      <div class="fld"><label>Rental potential?</label><div class="tlr" id="tl-rnt"></div></div>
-    </div>
-    <div class="g3">
-      <div class="fld"><label>Rental (£/room/mo)</label><input id="f-rp" type="number" placeholder="900"></div>
-      <div class="fld"><label>Commute (mins)</label><input id="f-com" type="number" placeholder="35"></div>
-      <div class="fld"><label>Mortgage est. (£/mo)</label><input id="f-mort" type="number" placeholder="2100"></div>
-    </div>
-    <div class="g2">
-      <div class="fld"><label>Balcony / outdoor?</label><div class="tlr" id="tl-bal"></div></div>
-      <div class="fld"><label>Lift in building?</label><div class="tlr" id="tl-lft"></div></div>
-    </div>
-    <div class="g2">
-      <div class="fld"><label>Parking?</label><div class="tlr" id="tl-prk"></div></div>
-      <div class="fld"><label>Internet / signal?</label><div class="tlr" id="tl-net"></div></div>
-    </div>
+    <div class="g2"><div class="fld"><label>Lodger-friendly layout?</label><div class="tlr" id="tl-lod"></div></div><div class="fld"><label>Rental potential?</label><div class="tlr" id="tl-rnt"></div></div></div>
+    <div class="g3"><div class="fld"><label>Rental (£/room/mo)</label><input id="f-rp" type="number" placeholder="900"></div><div class="fld"><label>Commute (mins)</label><input id="f-com" type="number" placeholder="35"></div><div class="fld"><label>Mortgage est. (£/mo)</label><input id="f-mort" type="number" placeholder="2100"></div></div>
+    <div class="g2"><div class="fld"><label>Balcony / outdoor?</label><div class="tlr" id="tl-bal"></div></div><div class="fld"><label>Lift in building?</label><div class="tlr" id="tl-lft"></div></div></div>
+    <div class="g2"><div class="fld"><label>Parking?</label><div class="tlr" id="tl-prk"></div></div><div class="fld"><label>Internet / signal?</label><div class="tlr" id="tl-net"></div></div></div>
   </div>
   <div class="slbl">Seller & agent</div>
   <div class="card">
-    <div class="g2">
-      <div class="fld"><label>Why is seller moving?</label><input id="f-why" placeholder="Upsizing"></div>
-      <div class="fld"><label>Time on market</label><input id="f-tom" placeholder="3 weeks"></div>
-    </div>
-    <div class="g2">
-      <div class="fld"><label>Price reductions?</label><div class="tlr" id="tl-pr"></div></div>
-      <div class="fld"><label>Chain involved?</label><div class="tlr" id="tl-ch"></div></div>
-    </div>
-    <div class="g2">
-      <div class="fld"><label>Agent name</label><input id="f-agt" placeholder="John at Foxtons"></div>
-      <div class="fld"><label>Agent contact</label><input id="f-agtc" placeholder="07700 000000"></div>
-    </div>
+    <div class="g2"><div class="fld"><label>Why is seller moving?</label><input id="f-why" placeholder="Upsizing"></div><div class="fld"><label>Time on market</label><input id="f-tom" placeholder="3 weeks"></div></div>
+    <div class="g2"><div class="fld"><label>Price reductions?</label><div class="tlr" id="tl-pr"></div></div><div class="fld"><label>Chain involved?</label><div class="tlr" id="tl-ch"></div></div></div>
+    <div class="g2"><div class="fld"><label>Agent name</label><input id="f-agt" placeholder="John at Foxtons"></div><div class="fld"><label>Agent contact</label><input id="f-agtc" placeholder="07700 000000"></div></div>
     <div class="fld"><label>Link to listing</label><input id="f-lnk" placeholder="https://rightmove.co.uk/..."></div>
   </div>
   <div class="slbl">Photos</div>
@@ -275,15 +174,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <input type="file" id="photo-input" accept="image/*" multiple style="display:none;" onchange="handlePhotos(event)">
     <div class="photo-grid" id="photo-grid"></div>
-    <div style="font-size:12px;color:var(--text3);background:var(--bg2);border-radius:var(--r);padding:8px 10px;margin-top:8px;"><i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>Photos are stored for this session. For permanent photos, paste a Google Photos or iCloud shared album link in the listing field.</div>
+    <div style="font-size:12px;color:var(--text3);background:var(--bg2);border-radius:var(--r);padding:8px 10px;margin-top:8px;">Photos are stored for this session. For permanent photos, paste a Google Photos shared album link in the listing field.</div>
   </div>
   <div class="slbl">Your notes</div>
   <div class="card">
     <div class="fld"><label>First impression</label><textarea id="f-imp" placeholder="Walk-in feeling — what hit you first?"></textarea></div>
-    <div class="g2">
-      <div class="fld"><label>Pros</label><textarea id="f-pro" placeholder="What stood out positively?"></textarea></div>
-      <div class="fld"><label>Cons</label><textarea id="f-con" placeholder="What gave you pause?"></textarea></div>
-    </div>
+    <div class="g2"><div class="fld"><label>Pros</label><textarea id="f-pro" placeholder="What stood out positively?"></textarea></div><div class="fld"><label>Cons</label><textarea id="f-con" placeholder="What gave you pause?"></textarea></div></div>
     <div class="fld"><label>Repairs / concerns</label><textarea id="f-rep" placeholder="Damp, old boiler, cracked ceiling..."></textarea></div>
     <div class="fld"><label>Gut feeling</label><textarea id="f-gut" placeholder="Could you imagine living here?"></textarea></div>
   </div>
@@ -307,69 +203,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- COSTS -->
 <div class="pane" id="pane-costs">
-  <div class="banner green">
-    <i class="ti ti-circle-check banner-icon"></i>
-    <div>
-      <div class="banner-title">First-time buyer with gifted deposit</div>
-      <div class="banner-text">Your father's gift qualifies you for full first-time buyer SDLT relief. Your solicitor will need a signed gifted deposit letter and proof of funds.</div>
-    </div>
-  </div>
+  <div class="banner green"><i class="ti ti-circle-check banner-icon"></i><div><div class="banner-title">First-time buyer with gifted deposit</div><div class="banner-text">Your father's gift qualifies you for full first-time buyer SDLT relief. Your solicitor will need a signed gifted deposit letter and proof of funds.</div></div></div>
   <div class="slbl">Purchase calculator</div>
   <div class="card">
-    <div class="g2">
-      <div class="fld"><label>Property price (£)</label><input id="c-price" type="number" value="475000" oninput="calcCosts()"></div>
-      <div class="fld"><label>Gift from father (£)</label><input id="c-gift" type="number" value="150000" oninput="calcCosts()"></div>
-    </div>
-    <div class="g2">
-      <div class="fld"><label>Your own savings (£)</label><input id="c-savings" type="number" value="0" oninput="calcCosts()"></div>
-      <div class="fld"><label>Mortgage rate (%)</label><input id="c-rate" type="number" value="4.5" step="0.1" oninput="calcCosts()"></div>
-    </div>
-    <div class="g2">
-      <div class="fld"><label>Mortgage term (years)</label><input id="c-term" type="number" value="25" oninput="calcCosts()"></div>
-      <div class="fld"><label>Survey type</label><select id="c-surv" onchange="calcCosts()"><option value="700">HomeBuyer Report (~£700)</option><option value="1200">Full structural (~£1,200)</option></select></div>
-    </div>
-    <div class="g2">
-      <div class="fld"><label>Solicitor fees (£)</label><input id="c-sol" type="number" value="2500" oninput="calcCosts()"></div>
-      <div class="fld"><label>Other costs (£)</label><input id="c-other" type="number" value="1500" oninput="calcCosts()"></div>
-    </div>
+    <div class="g2"><div class="fld"><label>Property price (£)</label><input id="c-price" type="number" value="475000" oninput="calcCosts()"></div><div class="fld"><label>Gift from father (£)</label><input id="c-gift" type="number" value="150000" oninput="calcCosts()"></div></div>
+    <div class="g2"><div class="fld"><label>Your own savings (£)</label><input id="c-savings" type="number" value="0" oninput="calcCosts()"></div><div class="fld"><label>Mortgage rate (%)</label><input id="c-rate" type="number" value="4.5" step="0.1" oninput="calcCosts()"></div></div>
+    <div class="g2"><div class="fld"><label>Mortgage term (years)</label><input id="c-term" type="number" value="25" oninput="calcCosts()"></div><div class="fld"><label>Survey type</label><select id="c-surv" onchange="calcCosts()"><option value="700">HomeBuyer Report (~£700)</option><option value="1200">Full structural (~£1,200)</option></select></div></div>
+    <div class="g2"><div class="fld"><label>Solicitor fees (£)</label><input id="c-sol" type="number" value="2500" oninput="calcCosts()"></div><div class="fld"><label>Other costs (£)</label><input id="c-other" type="number" value="1500" oninput="calcCosts()"></div></div>
   </div>
   <div class="slbl">Stamp duty — first-time buyer</div>
   <div class="card">
     <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">0% on first £425,000 · 5% on £425k–£625k · Standard rates above £625k</div>
     <div id="sdlt-breakdown"></div>
-    <div style="border-top:0.5px solid var(--border);padding-top:10px;margin-top:4px;display:flex;justify-content:space-between;">
-      <div style="font-size:13px;font-weight:500;">Total stamp duty</div>
-      <div id="sdlt-total" style="font-size:20px;font-weight:500;"></div>
-    </div>
+    <div style="border-top:0.5px solid var(--border);padding-top:10px;margin-top:4px;display:flex;justify-content:space-between;"><div style="font-size:13px;font-weight:500;">Total stamp duty</div><div id="sdlt-total" style="font-size:20px;font-weight:500;"></div></div>
   </div>
-  <div class="slbl">Upfront costs</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;" id="cost-summary"></div>
-  <div class="slbl">Deposit & mortgage</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem;" id="mortgage-summary"></div>
-  <div class="slbl">Monthly outgoings</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem;" id="monthly-summary"></div>
+  <div class="slbl">Upfront costs</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem;" id="cost-summary"></div>
+  <div class="slbl">Deposit & mortgage</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem;" id="mortgage-summary"></div>
+  <div class="slbl">Monthly outgoings</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.25rem;" id="monthly-summary"></div>
   <div class="card">
     <div style="font-size:13px;font-weight:500;margin-bottom:12px;">Lodger income offset</div>
-    <div class="g2" style="align-items:end;">
-      <div class="fld" style="margin:0;"><label>Room rent (£/mo)</label><input id="c-room" type="number" value="900" oninput="calcCosts()"></div>
-      <div><div style="font-size:12px;color:var(--text2);margin-bottom:4px;">Net monthly cost</div><div id="net-cost" style="font-size:22px;font-weight:500;"></div></div>
-    </div>
+    <div class="g2" style="align-items:end;"><div class="fld" style="margin:0;"><label>Room rent (£/mo)</label><input id="c-room" type="number" value="900" oninput="calcCosts()"></div><div><div style="font-size:12px;color:var(--text2);margin-bottom:4px;">Net monthly cost</div><div id="net-cost" style="font-size:22px;font-weight:500;"></div></div></div>
     <div style="margin-top:10px;font-size:12px;color:var(--text3);">Rent-a-Room relief: earn up to £7,500/yr tax-free from a lodger.</div>
   </div>
   <div class="slbl">Gifted deposit checklist</div>
-  <div class="card">
-    <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">Tick off as you gather each document.</div>
-    <div style="display:flex;flex-direction:column;gap:6px;" id="gift-checks"></div>
-  </div>
+  <div class="card"><div style="font-size:13px;color:var(--text2);margin-bottom:12px;">Tick off as you gather each document.</div><div style="display:flex;flex-direction:column;gap:6px;" id="gift-checks"></div></div>
 </div>
 
 <!-- COMPARE -->
 <div class="pane" id="pane-compare">
   <div id="cmp-empty" class="empty-state"><i class="ti ti-home"></i><h3>No viewings saved yet</h3><p>Save viewings to compare them here</p></div>
-  <div id="cmp-list" style="display:none;">
-    <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;background:var(--bg2);border-radius:var(--r);padding:8px 12px;">Tap any flat to reopen and edit it</div>
-    <div id="flat-rows"></div>
-  </div>
+  <div id="cmp-list" style="display:none;"><div style="font-size:12px;color:var(--text3);margin-bottom:1rem;background:var(--bg2);border-radius:var(--r);padding:8px 12px;">Tap any flat to reopen and edit it</div><div id="flat-rows"></div></div>
 </div>
 
 <!-- MAP -->
@@ -378,12 +241,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div id="map-wrap" style="display:none;">
     <div style="font-size:13px;color:var(--text2);margin-bottom:10px;">Circle size = viewings in area · Colour = average score</div>
     <svg id="london-map" viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" style="background:var(--bg2);border-radius:var(--rl);"></svg>
-    <div style="display:flex;align-items:center;gap:16px;margin-top:10px;font-size:12px;color:var(--text2);">
-      <span>Score:</span>
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#e24b4a;display:inline-block;"></span>0–5</span>
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#ef9f27;display:inline-block;"></span>5–7.5</span>
-      <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#639922;display:inline-block;"></span>7.5+</span>
-    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:10px;font-size:12px;color:var(--text2);"><span>Score:</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#e24b4a;display:inline-block;"></span>0–5</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#ef9f27;display:inline-block;"></span>5–7.5</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#639922;display:inline-block;"></span>7.5+</span></div>
     <div id="map-list" style="margin-top:1rem;display:flex;flex-direction:column;gap:6px;"></div>
   </div>
 </div>
@@ -398,147 +256,81 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── SUPABASE INIT (JS client — handles CORS automatically) ───
-const { createClient } = supabase;
-const sb = createClient(
-  'https://vbfdlqxyvrkqffmdzwvd.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZiZmRscXh5dnJrcWZmbWR6d3ZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0OTI1MjMsImV4cCI6MjA5NTA2ODUyM30.wKEnq3-9w6TUMrxValKecnCM6_w4d9ZnsyWy8FnXIbI'
-);
+// ─── JSONBIN CONFIG ───
+const JSONBIN_KEY = '$2a$10$5jwn8B78EB7Wb84e0nxJa.HKVM5Bg8hhnE8sadWbMJTxZWgHzBEFm';
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3';
+let BIN_ID = localStorage.getItem('jb_bin_id') || null;
 
-const SCORE_KEYS=[['light','Natural light'],['space','Space & layout'],['condition','Condition'],['noise','Noise level'],['location','Location & transport'],['value','Value for money'],['building','Building quality'],['gut','Gut feeling']];
-const CHECKS=['Lease years confirmed','Service charge amount','Reserve fund exists','Major works asked','EWS1/cladding checked','Boiler age checked','Damp/mould inspection','Cracks or leaks checked','Sound insulation tested','Natural light assessed','Storage measured','Ventilation checked','Seller reason asked','Time on market checked','Price reductions checked','Chain status confirmed','Area at night considered','Commute timed'];
-const TOGGLES=[['tl-res',['Yes','No','Unknown']],['tl-mw',['Yes','No','Unknown']],['tl-lod',['Yes','Maybe','No']],['tl-rnt',['Yes','Maybe','No']],['tl-bal',['Yes','No']],['tl-lft',['Yes','No']],['tl-prk',['Yes','No']],['tl-net',['Good','Poor','Unknown']],['tl-pr',['Yes','No','Unknown']],['tl-ch',['Yes','No','Unknown']]];
-const GIFT_CHECKS=[
-  {t:'Gifted deposit letter signed by father',s:'States it is a gift, not a loan, and he has no interest in the property'},
-  {t:"Father's bank statements (3 months)",s:'Showing the funds and their origin'},
-  {t:'Source of funds explanation',s:'How the money was accumulated'},
-  {t:'Proof of relationship',s:'Some lenders require evidence you are related'},
-  {t:'International transfer documentation',s:'SWIFT/wire transfer records'},
-  {t:'Indian FEMA/RBI compliance confirmed',s:'Transfer must be within LRS limits (~$250,000/yr)'},
-  {t:'Funds in your UK account 30+ days before completion',s:'Some lenders require this'},
-  {t:'Solicitor informed of gift source',s:'Required for AML obligations'}
-];
-const GLOSSARY=[
-  {cat:'The buying process',tag:'Process',items:[
-    {t:'Agreement in principle (AIP)',d:'A conditional offer from a lender confirming how much they would likely lend you, based on a soft credit check. Also called a Decision in Principle (DIP). You need this before making offers.'},
-    {t:'Conveyancing',d:'The legal process of transferring property ownership from seller to buyer. Your solicitor handles searches, checking the title, and exchanging contracts.'},
-    {t:'Exchange of contracts',d:'The point the sale becomes legally binding. Both parties sign identical contracts and swap them. Pulling out after exchange means losing your deposit.'},
-    {t:'Completion',d:'The day money transfers and you get the keys. Usually 1–4 weeks after exchange. Buildings insurance must be in place from exchange.'},
-    {t:'Chain',d:'A sequence of linked transactions — your purchase depends on another sale, which depends on another. Longer chains carry more risk of collapse.'},
-    {t:'Gazumping',d:'When a seller accepts a higher offer from another buyer after accepting yours, but before exchange. Legal in England and Wales. Move quickly to exchange to protect yourself.'},
-    {t:'Searches',d:'Checks your solicitor carries out — local authority (planned developments), water/drainage, and environmental (flooding, contamination). Usually £250–£500.'},
-    {t:'Title',d:'Legal proof of ownership. Your solicitor checks the title register at HMRC Land Registry to confirm the seller owns the property and there are no restrictions against it.'},
-  ]},
-  {cat:'Mortgages',tag:'Mortgage',items:[
-    {t:'LTV (Loan to Value)',d:'Your mortgage as a percentage of the property value. E.g. £380k mortgage on a £475k flat = 80% LTV. Lower LTV = better rates. Most lenders cap at 95% LTV.'},
-    {t:'Fixed rate mortgage',d:'Your interest rate is locked for a set period (usually 2 or 5 years). Predictable payments. At the end you revert to the lender\'s Standard Variable Rate unless you remortgage.'},
-    {t:'Tracker mortgage',d:'Rate tracks the Bank of England base rate plus a margin. Payments go up or down with rate changes. Can be cheaper when rates fall, riskier when they rise.'},
-    {t:'Repayment mortgage',d:'Each payment covers interest and capital. By the end of the term you own the property outright. Most common type for residential buyers.'},
-    {t:'Remortgage',d:'Switching your mortgage to a new deal. Usually done when a fixed-rate period ends to avoid the lender\'s Standard Variable Rate.'},
-    {t:'Early repayment charge (ERC)',d:'A fee for paying off your mortgage early or switching during a fixed-rate period. Typically 1–5% of the loan.'},
-    {t:'Mortgage broker',d:'An independent adviser who searches the market for the best deal. Often free (paid by lender commission). Recommended for first-time buyers.'},
-    {t:'Debt-to-income ratio',d:'Lenders assess your income vs existing debts and the new mortgage. Most lend 4–4.5x annual income. Some go to 5.5x for higher earners.'},
-  ]},
-  {cat:'Leasehold & ownership',tag:'Leasehold',items:[
-    {t:'Leasehold',d:'You own the property for a fixed number of years but not the land. Almost all London flats are leasehold. Key risk: leases under 80 years are hard to mortgage and expensive to extend.'},
-    {t:'Freehold',d:'You own the property and land outright, forever. Common for houses, rare for flats. No lease, no ground rent, no freeholder.'},
-    {t:'Share of freehold',d:'You own a leasehold flat but also jointly own the freehold with other flat owners. Best of both — you can extend the lease cheaply and control the building.'},
-    {t:'Lease extension',d:'Adding years to a leasehold. You have a legal right to extend by 90 years. Below 80 years remaining, costs rise sharply. Below 70 years, many lenders refuse to mortgage.'},
-    {t:'Ground rent',d:'Annual fee paid to the freeholder. Since 2022, new leases cannot charge more than a peppercorn. Older leases may have escalating ground rents — check carefully.'},
-    {t:'Service charge',d:'Annual fee covering maintenance and management of shared areas. Always ask for the last 3 years of accounts and check for upcoming major works.'},
-    {t:'Sinking fund / reserve fund',d:'Money set aside for future major repairs. A healthy fund protects leaseholders from large unexpected bills.'},
-    {t:'Section 20 notice',d:'Legal notice served on leaseholders when major works over £250 per flat are planned. Gives you the right to consult on costs. Always ask if one has been or will be issued.'},
-  ]},
-  {cat:'Fire safety & cladding',tag:'Safety',items:[
-    {t:'EWS1 form',d:'External Wall System assessment — certifies whether a building\'s external walls are safe. Required by most lenders for flats in buildings over 11m tall. Without it the flat may be unmortgageable.'},
-    {t:'Cladding',d:'External panels on a building facade. Certain types (e.g. ACM cladding like Grenfell Tower) are a fire risk. Always check cladding status on any high-rise or post-war building.'},
-    {t:'Building Safety Act 2022',d:'Requires building owners to remediate unsafe cladding, with costs generally not passed to leaseholders for buildings over 11m.'},
-    {t:'Remediation',d:'Fixing unsafe cladding or fire safety defects. Can take years and may affect the building\'s insurance and mortgageability during the process.'},
-  ]},
-  {cat:'Surveys & condition',tag:'Survey',items:[
-    {t:'HomeBuyer Report (Level 2)',d:'The most common survey for flats. A visual inspection identifying defects and risks. Costs ~£500–£900. Sufficient for most modern or well-maintained flats.'},
-    {t:'Full structural survey (Level 3)',d:'More comprehensive — structural analysis and detailed condition report. Costs ~£1,000–£1,500. Recommended for older buildings or if the HomeBuyer report flags concerns.'},
-    {t:'Mortgage valuation',d:'The lender\'s assessment of the property value — done to protect the lender, not you. Does not replace a proper survey.'},
-    {t:'Damp',d:'Common in older buildings. Can be rising damp, penetrating damp, or condensation. Look for tide marks, peeling paint, musty smells. Can be expensive to fix.'},
-    {t:'Subsidence',d:'When the ground beneath a property sinks causing structural movement. Signs include diagonal cracks, sticking doors. Potentially very costly.'},
-  ]},
-  {cat:'Costs & tax',tag:'Costs',items:[
-    {t:'Stamp duty land tax (SDLT)',d:'Tax on property purchases. As a first-time buyer purchasing alone: 0% on first £425,000, 5% on £425,001–£625,000. No relief above £625,000. Must be paid within 14 days of completion.'},
-    {t:'First-time buyer relief',d:'Reduction in SDLT. Only applies if you have never owned residential property anywhere in the world, and the property costs £625,000 or less.'},
-    {t:'Solicitor / conveyancing fees',d:'Typically £1,500–£3,500 for a leasehold flat in London. Get at least three quotes.'},
-    {t:'Land Registry fee',d:'Fee to register new ownership. Scales with purchase price — typically £135–£295. Your solicitor handles this.'},
-    {t:'Buildings insurance',d:'For a flat, usually arranged by the freeholder and included in service charge. Contents insurance is separate and your responsibility.'},
-  ]},
-  {cat:'Making an offer',tag:'Offer',items:[
-    {t:'Asking price',d:'The listed price. In London, flats often sell at or above asking in competitive areas. Research recent sold prices on Rightmove or Land Registry before bidding.'},
-    {t:'Offer subject to contract (STC)',d:'An accepted offer is not legally binding until exchange. Either party can still pull out.'},
-    {t:'Best and final offer',d:'All interested buyers submit their highest offer by a deadline. One chance — no negotiation.'},
-    {t:'Buyer strength',d:'How attractive you are beyond price. First-time buyers with a mortgage in principle, no chain, and a ready solicitor are considered strong and can beat higher offers.'},
-  ]}
-];
-const LONDON_AREAS={'E1':[305,215],'E2':[320,200],'E3':[345,195],'E14':[340,225],'E15':[355,190],'EC1':[285,200],'EC2':[295,205],'EC3':[300,215],'EC4':[285,210],'N1':[280,180],'N4':[265,160],'N7':[270,175],'N8':[265,150],'N16':[290,170],'NW1':[255,180],'NW3':[240,170],'NW5':[255,170],'NW6':[230,175],'NW8':[245,185],'SE1':[295,230],'SE5':[290,250],'SE8':[315,240],'SE10':[335,235],'SE11':[285,240],'SE15':[305,255],'SE16':[315,230],'SE17':[295,243],'SE22':[300,265],'SE23':[305,270],'SW1':[260,233],'SW2':[270,255],'SW3':[250,240],'SW4':[265,250],'SW6':[240,245],'SW7':[245,235],'SW8':[270,243],'SW9':[280,250],'SW10':[242,243],'SW11':[258,248],'SW12':[260,260],'W1':[258,205],'W2':[242,203],'W4':[210,225],'W6':[225,233],'W8':[240,223],'W9':[235,193],'W10':[228,203],'W11':[233,213],'W12':[220,223],'W14':[233,230],'WC1':[278,200],'WC2':[275,210]};
-
-let scores={},toggleVals={},checked=new Set(),sessionPhotos=[],flats=[],editingId=null;
-
-// ─── SYNC ───
-function setSyncStatus(state,label){
-  document.getElementById('sync-dot').className='sync-dot '+state;
-  document.getElementById('sync-label').textContent=label;
-}
-function showToast(msg,dur=3000){
-  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),dur);
+async function jbRequest(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY }
+  };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res = await fetch(JSONBIN_BASE + path, opts);
+  if (!res.ok) throw new Error('JSONBin error: ' + res.status);
+  return res.json();
 }
 
-async function loadFromCloud(){
-  setSyncStatus('syncing','Loading...');
-  try{
-    const {data,error}=await sb.from('viewings').select('id,data').order('id',{ascending:true});
-    if(error)throw error;
-    flats=data.map(r=>({...r.data,id:r.id}));
-    setSyncStatus('synced','Synced ✓');
+async function ensureBin() {
+  if (BIN_ID) return BIN_ID;
+  const res = await jbRequest('POST', '/b', { viewings: [] });
+  BIN_ID = res.metadata.id;
+  localStorage.setItem('jb_bin_id', BIN_ID);
+  return BIN_ID;
+}
+
+async function loadFromCloud() {
+  setSyncStatus('syncing', 'Loading...');
+  try {
+    const id = await ensureBin();
+    const res = await jbRequest('GET', '/b/' + id + '/latest');
+    flats = res.record.viewings || [];
+    setSyncStatus('synced', 'Synced ✓');
     updateAll();
-  }catch(e){
-    setSyncStatus('error','Offline');
-    try{flats=JSON.parse(localStorage.getItem('flt_backup')||'[]');}catch(_){}
+  } catch (e) {
+    setSyncStatus('error', 'Offline');
+    try { flats = JSON.parse(localStorage.getItem('flt_backup') || '[]'); } catch (_) {}
     updateAll();
-    showToast('Could not connect — using local backup');
+    showToast('Using local backup — check connection');
   }
 }
 
-async function saveToCloud(flat){
-  const{id,...data}=flat;
-  setSyncStatus('syncing','Saving...');
-  try{
-    if(editingId){
-      const{error}=await sb.from('viewings').update({data}).eq('id',id);
-      if(error)throw error;
-    }else{
-      const{error}=await sb.from('viewings').insert({id,data});
-      if(error)throw error;
-    }
-    setSyncStatus('synced','Saved ✓');
-    try{localStorage.setItem('flt_backup',JSON.stringify(flats));}catch(_){}
-  }catch(e){
-    setSyncStatus('error','Save failed');
+async function saveAllToCloud() {
+  setSyncStatus('syncing', 'Saving...');
+  try {
+    const id = await ensureBin();
+    await jbRequest('PUT', '/b/' + id, { viewings: flats });
+    setSyncStatus('synced', 'Saved ✓');
+    localStorage.setItem('flt_backup', JSON.stringify(flats));
+  } catch (e) {
+    setSyncStatus('error', 'Save failed');
     showToast('Could not save — check your connection');
     throw e;
   }
 }
 
-async function deleteFromCloud(id){
-  setSyncStatus('syncing','Deleting...');
-  try{
-    const{error}=await sb.from('viewings').delete().eq('id',id);
-    if(error)throw error;
-    setSyncStatus('synced','Synced ✓');
-  }catch(e){
-    setSyncStatus('error','Delete failed');
-    showToast('Could not delete — check your connection');
-  }
-}
+// ─── DATA ───
+const SCORE_KEYS=[['light','Natural light'],['space','Space & layout'],['condition','Condition'],['noise','Noise level'],['location','Location & transport'],['value','Value for money'],['building','Building quality'],['gut','Gut feeling']];
+const CHECKS=['Lease years confirmed','Service charge amount','Reserve fund exists','Major works asked','EWS1/cladding checked','Boiler age checked','Damp/mould inspection','Cracks or leaks checked','Sound insulation tested','Natural light assessed','Storage measured','Ventilation checked','Seller reason asked','Time on market checked','Price reductions checked','Chain status confirmed','Area at night considered','Commute timed'];
+const TOGGLES=[['tl-res',['Yes','No','Unknown']],['tl-mw',['Yes','No','Unknown']],['tl-lod',['Yes','Maybe','No']],['tl-rnt',['Yes','Maybe','No']],['tl-bal',['Yes','No']],['tl-lft',['Yes','No']],['tl-prk',['Yes','No']],['tl-net',['Good','Poor','Unknown']],['tl-pr',['Yes','No','Unknown']],['tl-ch',['Yes','No','Unknown']]];
+const GIFT_CHECKS=[{t:'Gifted deposit letter signed by father',s:'States it is a gift with no interest in the property'},{t:"Father's bank statements (3 months)",s:'Showing the funds and their origin'},{t:'Source of funds explanation',s:'How the money was accumulated'},{t:'Proof of relationship',s:'Some lenders require evidence you are related'},{t:'International transfer documentation',s:'SWIFT/wire transfer records'},{t:'Indian FEMA/RBI compliance confirmed',s:'Transfer within LRS limits (~$250,000/yr)'},{t:'Funds in your UK account 30+ days before completion',s:'Some lenders require this'},{t:'Solicitor informed of gift source',s:'Required for AML obligations'}];
+const GLOSSARY=[
+  {cat:'The buying process',tag:'Process',items:[{t:'Agreement in principle (AIP)',d:'A conditional offer from a lender confirming how much they would likely lend you. Also called Decision in Principle (DIP). You need this before making offers.'},{t:'Conveyancing',d:'The legal process of transferring property ownership. Your solicitor handles searches, checking the title, and exchanging contracts.'},{t:'Exchange of contracts',d:'The point the sale becomes legally binding. Pulling out after exchange means losing your deposit.'},{t:'Completion',d:'The day money transfers and you get the keys. Usually 1–4 weeks after exchange. Buildings insurance must be in place from exchange.'},{t:'Chain',d:'A sequence of linked transactions. Longer chains carry more risk of collapse. Chain-free purchases are lower risk.'},{t:'Gazumping',d:'When a seller accepts a higher offer from another buyer after accepting yours, before exchange. Legal but unethical. Move quickly to exchange.'},{t:'Searches',d:'Checks your solicitor carries out — local authority, water/drainage, environmental. Usually £250–£500.'},{t:'Title',d:'Legal proof of ownership. Your solicitor checks the Land Registry to confirm the seller owns the property free of restrictions.'}]},
+  {cat:'Mortgages',tag:'Mortgage',items:[{t:'LTV (Loan to Value)',d:'Your mortgage as a percentage of the property value. E.g. £380k on £475k = 80% LTV. Lower LTV = better rates.'},{t:'Fixed rate mortgage',d:'Interest rate locked for a set period (usually 2–5 years). Predictable payments. Reverts to Standard Variable Rate when it ends.'},{t:'Tracker mortgage',d:'Rate tracks the Bank of England base rate. Payments go up or down with rate changes.'},{t:'Repayment mortgage',d:'Each payment covers interest and capital. You own outright by the end of the term. Most common for residential buyers.'},{t:'Remortgage',d:'Switching your mortgage to a new deal, usually when a fixed-rate period ends.'},{t:'Early repayment charge (ERC)',d:'A fee for paying off your mortgage early or switching during a fixed period. Typically 1–5% of the loan.'},{t:'Mortgage broker',d:'An independent adviser who searches for the best deal. Often free (paid by lender commission). Recommended for first-time buyers.'},{t:'Debt-to-income ratio',d:'Lenders assess your income vs debts. Most lend 4–4.5x annual income. Some go to 5.5x for higher earners.'}]},
+  {cat:'Leasehold & ownership',tag:'Leasehold',items:[{t:'Leasehold',d:'You own the property for a fixed number of years but not the land. Almost all London flats are leasehold. Leases under 80 years are hard to mortgage and expensive to extend.'},{t:'Freehold',d:'You own the property and land outright forever. Common for houses, rare for flats.'},{t:'Share of freehold',d:'You own a leasehold flat but also jointly own the freehold with other flat owners. Best of both — cheap lease extension and building control.'},{t:'Lease extension',d:'Adding years to a leasehold. You have a legal right to extend by 90 years. Below 80 years remaining, costs rise sharply.'},{t:'Ground rent',d:'Annual fee paid to the freeholder. Since 2022, new leases cannot charge more than a peppercorn. Check older leases for escalating ground rents.'},{t:'Service charge',d:'Annual fee covering building maintenance. Always ask for 3 years of accounts and check for upcoming major works.'},{t:'Sinking fund / reserve fund',d:'Money set aside for future major repairs. A healthy fund protects leaseholders from large unexpected bills.'},{t:'Section 20 notice',d:'Legal notice when major works over £250 per flat are planned. Gives you the right to consult on costs.'}]},
+  {cat:'Fire safety & cladding',tag:'Safety',items:[{t:'EWS1 form',d:'External Wall System assessment — certifies whether a building\'s walls are safe. Required by most lenders for flats over 11m. Without it the flat may be unmortgageable.'},{t:'Cladding',d:'External building panels. Certain types (e.g. ACM cladding like Grenfell) are a fire risk. Always check cladding status on high-rise or post-war buildings.'},{t:'Building Safety Act 2022',d:'Requires building owners to remediate unsafe cladding, with costs generally not passed to leaseholders for buildings over 11m.'},{t:'Remediation',d:'Fixing unsafe cladding. Can take years and may affect insurance and mortgageability during the process.'}]},
+  {cat:'Surveys & condition',tag:'Survey',items:[{t:'HomeBuyer Report (Level 2)',d:'Most common survey for flats. Visual inspection identifying defects and risks. Costs ~£500–£900. Sufficient for most modern or well-maintained flats.'},{t:'Full structural survey (Level 3)',d:'More comprehensive. Structural analysis and detailed condition report. Costs ~£1,000–£1,500. Recommended for older buildings.'},{t:'Mortgage valuation',d:'The lender\'s assessment of value — protects the lender, not you. Does not replace a proper survey.'},{t:'Damp',d:'Common in older buildings. Rising damp, penetrating damp, or condensation. Look for tide marks, peeling paint, musty smells.'},{t:'Subsidence',d:'Ground beneath the property sinks causing structural movement. Signs include diagonal cracks, sticking doors. Very costly to fix.'}]},
+  {cat:'Costs & tax',tag:'Costs',items:[{t:'Stamp duty land tax (SDLT)',d:'Tax on property purchases. As a first-time buyer: 0% on first £425,000, 5% on £425,001–£625,000. No relief above £625,000. Pay within 14 days of completion.'},{t:'First-time buyer relief',d:'Reduction in SDLT. Only applies if you have never owned residential property anywhere in the world, and the property costs £625,000 or less.'},{t:'Solicitor / conveyancing fees',d:'Typically £1,500–£3,500 for a leasehold flat in London. Get at least three quotes.'},{t:'Land Registry fee',d:'Fee to register new ownership. Typically £135–£295. Your solicitor handles this.'},{t:'Buildings insurance',d:'For a flat, usually arranged by the freeholder and included in service charge. Contents insurance is your responsibility.'}]},
+  {cat:'Making an offer',tag:'Offer',items:[{t:'Asking price',d:'The listed price. In London, flats often sell at or above asking in competitive areas. Research recent sold prices on Rightmove or Land Registry.'},{t:'Offer subject to contract (STC)',d:'An accepted offer is not legally binding until exchange. Either party can still pull out.'},{t:'Best and final offer',d:'All buyers submit their highest offer by a deadline. One chance — no negotiation afterwards.'},{t:'Buyer strength',d:'How attractive you are beyond price. First-time buyers with a mortgage in principle, no chain, and a ready solicitor can beat higher offers.'}]}
+];
+const LONDON_AREAS={'E1':[305,215],'E2':[320,200],'E3':[345,195],'E14':[340,225],'E15':[355,190],'EC1':[285,200],'EC2':[295,205],'EC3':[300,215],'EC4':[285,210],'N1':[280,180],'N4':[265,160],'N7':[270,175],'N8':[265,150],'N16':[290,170],'NW1':[255,180],'NW3':[240,170],'NW5':[255,170],'NW6':[230,175],'NW8':[245,185],'SE1':[295,230],'SE5':[290,250],'SE8':[315,240],'SE10':[335,235],'SE11':[285,240],'SE15':[305,255],'SE16':[315,230],'SE17':[295,243],'SE22':[300,265],'SE23':[305,270],'SW1':[260,233],'SW2':[270,255],'SW3':[250,240],'SW4':[265,250],'SW6':[240,245],'SW7':[245,235],'SW8':[270,243],'SW9':[280,250],'SW10':[242,243],'SW11':[258,248],'SW12':[260,260],'W1':[258,205],'W2':[242,203],'W4':[210,225],'W6':[225,233],'W8':[240,223],'W9':[235,193],'W10':[228,203],'W11':[233,213],'W12':[220,223],'W14':[233,230],'WC1':[278,200],'WC2':[275,210]};
 
-// ─── INIT ───
+let scores={},toggleVals={},checked=new Set(),sessionPhotos=[],flats=[],editingId=null;
+
+function setSyncStatus(s,l){document.getElementById('sync-dot').className='sync-dot '+s;document.getElementById('sync-label').textContent=l;}
+function showToast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+
 function init(){
   document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
   const sg=document.getElementById('score-grid');
@@ -564,7 +356,7 @@ function init(){
     });
   });
   const gc=document.getElementById('gift-checks');
-  GIFT_CHECKS.forEach((item)=>{
+  GIFT_CHECKS.forEach(item=>{
     const d=document.createElement('div');d.className='chki';
     d.innerHTML=`<div class="chkb">&#10003;</div><div><div style="font-size:13px;font-weight:500;">${item.t}</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">${item.s}</div></div>`;
     d.onclick=()=>d.classList.toggle('on');
@@ -592,21 +384,8 @@ function updateScoreBar(){
   const v=document.getElementById('sverdict');v.textContent=vt;v.style.background=bg;v.style.color=tc;
 }
 function calcPPSF(){const p=parseFloat(document.getElementById('f-price').value),s=parseFloat(document.getElementById('f-sqft').value);document.getElementById('f-ppsf').value=(p&&s)?'£'+Math.round(p/s):'';}
-function handlePhotos(e){
-  Array.from(e.target.files).forEach(file=>{
-    const reader=new FileReader();
-    reader.onload=ev=>{sessionPhotos.push({dataUrl:ev.target.result});renderPhotoGrid();};
-    reader.readAsDataURL(file);
-  });e.target.value='';
-}
-function renderPhotoGrid(){
-  const grid=document.getElementById('photo-grid');grid.innerHTML='';
-  sessionPhotos.forEach((p,i)=>{
-    const d=document.createElement('div');d.className='photo-thumb';
-    d.innerHTML=`<img src="${p.dataUrl}" alt="Photo"><button class="photo-del" onclick="sessionPhotos.splice(${i},1);renderPhotoGrid()">&#10005;</button>`;
-    grid.appendChild(d);
-  });
-}
+function handlePhotos(e){Array.from(e.target.files).forEach(file=>{const r=new FileReader();r.onload=ev=>{sessionPhotos.push({dataUrl:ev.target.result});renderPhotoGrid();};r.readAsDataURL(file);});e.target.value='';}
+function renderPhotoGrid(){const grid=document.getElementById('photo-grid');grid.innerHTML='';sessionPhotos.forEach((p,i)=>{const d=document.createElement('div');d.className='photo-thumb';d.innerHTML=`<img src="${p.dataUrl}"><button class="photo-del" onclick="sessionPhotos.splice(${i},1);renderPhotoGrid()">&#10005;</button>`;grid.appendChild(d);});}
 function calcSDLT(price){
   if(price<=425000)return{bands:[{l:'£0–£425,000',r:'0%',t:0}],total:0};
   if(price<=625000){const tax=Math.round((price-425000)*0.05);return{bands:[{l:'£0–£425,000',r:'0%',t:0},{l:'£425,001–£'+price.toLocaleString(),r:'5%',t:tax}],total:tax};}
@@ -614,25 +393,14 @@ function calcSDLT(price){
   if(price>1500000){const c=price-1500000,tx=Math.round(c*0.12);t+=tx;bands.push({l:'Above £1,500,000',r:'12%',t:tx});}
   if(price>925000){const c=Math.min(price,1500000)-925000,tx=Math.round(c*0.10);t+=tx;bands.push({l:'£925,001–£1,500,000',r:'10%',t:tx});}
   if(price>250000){const c=Math.min(price,925000)-250000,tx=Math.round(c*0.05);t+=tx;bands.push({l:'£250,001–£925,000',r:'5%',t:tx});}
-  bands.push({l:'£0–£250,000',r:'0%',t:0});
-  return{bands:bands.reverse(),total:t,warn:true};
+  bands.push({l:'£0–£250,000',r:'0%',t:0});return{bands:bands.reverse(),total:t,warn:true};
 }
 function fmt(n){return'£'+Math.round(n).toLocaleString();}
 function calcCosts(){
-  const price=parseFloat(document.getElementById('c-price').value)||475000;
-  const gift=parseFloat(document.getElementById('c-gift').value)||0;
-  const savings=parseFloat(document.getElementById('c-savings').value)||0;
-  const rate=parseFloat(document.getElementById('c-rate').value)||4.5;
-  const term=parseFloat(document.getElementById('c-term').value)||25;
-  const sol=parseFloat(document.getElementById('c-sol').value)||2500;
-  const surv=parseFloat(document.getElementById('c-surv').value)||700;
-  const other=parseFloat(document.getElementById('c-other').value)||1500;
-  const room=parseFloat(document.getElementById('c-room').value)||900;
-  const deposit=gift+savings,loan=Math.max(price-deposit,0);
-  const mr=rate/100/12,n=term*12;
+  const price=parseFloat(document.getElementById('c-price').value)||475000,gift=parseFloat(document.getElementById('c-gift').value)||0,savings=parseFloat(document.getElementById('c-savings').value)||0,rate=parseFloat(document.getElementById('c-rate').value)||4.5,term=parseFloat(document.getElementById('c-term').value)||25,sol=parseFloat(document.getElementById('c-sol').value)||2500,surv=parseFloat(document.getElementById('c-surv').value)||700,other=parseFloat(document.getElementById('c-other').value)||1500,room=parseFloat(document.getElementById('c-room').value)||900;
+  const deposit=gift+savings,loan=Math.max(price-deposit,0),mr=rate/100/12,n=term*12;
   const monthly=loan>0?(mr?Math.round(loan*(mr*Math.pow(1+mr,n))/(Math.pow(1+mr,n)-1)):Math.round(loan/n)):0;
-  const ltv=price>0?Math.round((loan/price)*100):0;
-  const sdlt=calcSDLT(price);
+  const ltv=price>0?Math.round((loan/price)*100):0,sdlt=calcSDLT(price);
   const bd=document.getElementById('sdlt-breakdown');bd.innerHTML='';
   if(sdlt.warn)bd.innerHTML+=`<div style="font-size:12px;background:var(--amber-bg);color:var(--amber-text);padding:7px 10px;border-radius:var(--r);margin-bottom:8px;">Above £625,000 — first-time buyer relief is lost</div>`;
   sdlt.bands.forEach(b=>{bd.innerHTML+=`<div class="sdlt-band-row"><span style="color:var(--text2);">${b.l}</span><span style="color:var(--text3);margin:0 8px;">${b.r}</span><span style="font-weight:500;">${fmt(b.t)}</span></div>`;});
@@ -644,36 +412,20 @@ function calcCosts(){
   document.getElementById('net-cost').textContent=fmt(monthly-room)+'/mo';
 }
 function gv(id){return document.getElementById(id)?.value||'';}
-function computeScore(){
-  const rated=SCORE_KEYS.map(x=>x[0]).filter(k=>scores[k]);
-  if(!rated.length)return 0;
-  return Math.round(rated.reduce((a,k)=>a+scores[k],0)/rated.length*20)/10;
-}
+function computeScore(){const rated=SCORE_KEYS.map(x=>x[0]).filter(k=>scores[k]);if(!rated.length)return 0;return Math.round(rated.reduce((a,k)=>a+scores[k],0)/rated.length*20)/10;}
 async function saveFlat(){
   const addr=gv('f-addr');if(!addr){alert('Please enter an address');return;}
   const btn=document.getElementById('save-btn');btn.disabled=true;btn.textContent='Saving...';
-  const flat={
-    id:editingId||Date.now(),address:addr,date:gv('f-date'),price:gv('f-price'),sqft:gv('f-sqft'),ppsf:gv('f-ppsf'),
-    beds:gv('f-beds'),baths:gv('f-baths'),floor:gv('f-floor'),station:gv('f-stn'),walk:gv('f-walk'),
-    epc:gv('f-epc'),ctax:gv('f-ctax'),heating:gv('f-heat'),tenure:gv('f-ten'),lease:gv('f-lease'),
-    grent:gv('f-grent'),scharge:gv('f-sc'),bills:gv('f-bills'),sctrend:gv('f-sct'),ews1:gv('f-ews'),
-    agent:gv('f-agt'),agentc:gv('f-agtc'),link:gv('f-lnk'),whysell:gv('f-why'),timemarket:gv('f-tom'),
-    rentpot:gv('f-rp'),commute:gv('f-com'),mort:gv('f-mort'),
-    impression:gv('f-imp'),pros:gv('f-pro'),cons:gv('f-con'),repairs:gv('f-rep'),guttext:gv('f-gut'),
-    scores:{...scores},toggles:{...toggleVals},checklist:[...checked],score:computeScore(),photoCount:sessionPhotos.length
-  };
+  const flat={id:editingId||Date.now(),address:addr,date:gv('f-date'),price:gv('f-price'),sqft:gv('f-sqft'),ppsf:gv('f-ppsf'),beds:gv('f-beds'),baths:gv('f-baths'),floor:gv('f-floor'),station:gv('f-stn'),walk:gv('f-walk'),epc:gv('f-epc'),ctax:gv('f-ctax'),heating:gv('f-heat'),tenure:gv('f-ten'),lease:gv('f-lease'),grent:gv('f-grent'),scharge:gv('f-sc'),bills:gv('f-bills'),sctrend:gv('f-sct'),ews1:gv('f-ews'),agent:gv('f-agt'),agentc:gv('f-agtc'),link:gv('f-lnk'),whysell:gv('f-why'),timemarket:gv('f-tom'),rentpot:gv('f-rp'),commute:gv('f-com'),mort:gv('f-mort'),impression:gv('f-imp'),pros:gv('f-pro'),cons:gv('f-con'),repairs:gv('f-rep'),guttext:gv('f-gut'),scores:{...scores},toggles:{...toggleVals},checklist:[...checked],score:computeScore(),photoCount:sessionPhotos.length};
   try{
-    await saveToCloud(flat);
     if(editingId){flats=flats.map(x=>x.id===editingId?flat:x);}else{flats.push(flat);}
+    await saveAllToCloud();
     editingId=null;updateAll();clearForm();showTab('viewings');showToast('Viewing saved ✓');
-  }catch(e){}
+  }catch(e){if(editingId)flats=flats.map(x=>x.id===editingId?x:x);else flats.pop();}
   btn.disabled=false;btn.textContent=editingId?'Update viewing':'Save viewing';
 }
 function clearForm(){
-  document.querySelectorAll('#pane-form input,#pane-form select,#pane-form textarea').forEach(el=>{
-    if(el.type==='date')el.value=new Date().toISOString().split('T')[0];
-    else if(!el.readOnly)el.value='';
-  });
+  document.querySelectorAll('#pane-form input,#pane-form select,#pane-form textarea').forEach(el=>{if(el.type==='date')el.value=new Date().toISOString().split('T')[0];else if(!el.readOnly)el.value='';});
   document.getElementById('f-ppsf').value='';
   document.querySelectorAll('.tlb').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('#pane-form .chki').forEach(el=>el.classList.remove('on'));
@@ -694,20 +446,14 @@ function loadFlat(f){
 }
 async function deleteFlat(id,e){
   e.stopPropagation();if(!confirm('Delete this viewing?'))return;
-  await deleteFromCloud(id);
   flats=flats.filter(f=>f.id!==id);
-  try{localStorage.setItem('flt_backup',JSON.stringify(flats));}catch(_){}
-  updateAll();showToast('Viewing deleted');
+  await saveAllToCloud();updateAll();showToast('Viewing deleted');
 }
 function updateAll(){
   document.getElementById('vcnt').textContent=flats.length?`(${flats.length})`:'';
   updateViewings();updateCompare();
 }
-function scColor(s){
-  if(s>=7.5)return{bg:'var(--green-bg)',tc:'var(--green-text)'};
-  if(s>=5)return{bg:'var(--amber-bg)',tc:'var(--amber-text)'};
-  return{bg:'var(--red-bg)',tc:'var(--red-text)'};
-}
+function scColor(s){if(s>=7.5)return{bg:'var(--green-bg)',tc:'var(--green-text)'};if(s>=5)return{bg:'var(--amber-bg)',tc:'var(--amber-text)'};return{bg:'var(--red-bg)',tc:'var(--red-text)'};}
 function di(label,val){if(!val)return'';return`<div class="detail-item"><div class="detail-label">${label}</div><div class="detail-val">${val}</div></div>`;}
 function updateViewings(){
   const empty=document.getElementById('vw-empty'),list=document.getElementById('vw-list');
@@ -715,55 +461,21 @@ function updateViewings(){
   empty.style.display='none';list.style.display='block';
   const container=document.getElementById('viewing-cards');container.innerHTML='';
   [...flats].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(f=>{
-    const sc=scColor(f.score);
-    const price=f.price?'£'+parseInt(f.price).toLocaleString():'';
+    const sc=scColor(f.score),price=f.price?'£'+parseInt(f.price).toLocaleString():'';
     const meta=[price,f.beds?f.beds+'bed '+f.baths+'bath':'',f.station?f.station+(f.walk?' ('+f.walk+'min)':''):''].filter(Boolean).join(' · ');
     const card=document.createElement('div');card.className='viewing-card';
-    card.innerHTML=`
-      <div class="viewing-card-header" onclick="toggleViewing(this)">
-        <div style="flex:1;"><div style="font-size:14px;font-weight:500;">${f.address}</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">${f.date||''}${meta?' · '+meta:''}</div></div>
-        <div style="padding:4px 10px;border-radius:var(--r);background:${sc.bg};color:${sc.tc};font-size:13px;font-weight:500;margin-right:8px;">${f.score||'—'}</div>
-        <i class="ti ti-chevron-down" style="font-size:16px;color:var(--text3);transition:transform 0.2s;"></i>
-      </div>
-      <div class="viewing-card-body">
-        <div style="padding-top:12px;">
-          <div class="detail-grid">
-            ${di('Asking price',price)}${di('Price/sqft',f.ppsf)}${di('Sq ft',f.sqft)}${di('Floor',f.floor)}
-            ${di('Station',f.station+(f.walk?' · '+f.walk+'min':''))}${di('EPC',f.epc)}
-            ${di('Council tax',f.ctax)}${di('Tenure',f.tenure)}${di('Lease years',f.lease)}
-            ${di('Ground rent',f.grent?'£'+f.grent+'/yr':'')}
-            ${di('Service charge',f.scharge?'£'+parseInt(f.scharge).toLocaleString()+'/yr':'')}
-            ${di('SC trend',f.sctrend)}${di('EWS1',f.ews1)}${di('Agent',f.agent)}
-            ${di('Commute',f.commute?f.commute+'min':'')}${di('Photos',f.photoCount?f.photoCount+'':'')}
-          </div>
-          ${f.impression?`<div class="note-block"><div class="note-label">First impression</div><div class="note-text">${f.impression}</div></div>`:''}
-          ${f.pros?`<div class="note-block"><div class="note-label">Pros</div><div class="note-text">${f.pros}</div></div>`:''}
-          ${f.cons?`<div class="note-block"><div class="note-label">Cons</div><div class="note-text">${f.cons}</div></div>`:''}
-          ${f.repairs?`<div class="note-block"><div class="note-label">Repairs / concerns</div><div class="note-text">${f.repairs}</div></div>`:''}
-          ${f.guttext?`<div class="note-block"><div class="note-label">Gut feeling</div><div class="note-text">${f.guttext}</div></div>`:''}
-          ${f.link?`<div style="margin-top:10px;"><a href="${f.link}" target="_blank" style="font-size:13px;color:var(--blue-text);display:flex;align-items:center;gap:4px;"><i class="ti ti-external-link" style="font-size:14px;"></i>View listing</a></div>`:''}
-          <div style="display:flex;gap:8px;margin-top:14px;">
-            <button onclick="loadFlat(flats.find(x=>x.id==${f.id}))" style="flex:1;padding:9px;font-size:13px;font-weight:500;background:var(--text);color:var(--bg);border:none;border-radius:var(--r);cursor:pointer;">Edit</button>
-            <button onclick="deleteFlat(${f.id},event)" style="padding:9px 14px;font-size:13px;border-radius:var(--r);cursor:pointer;border:0.5px solid var(--border);background:var(--bg);color:var(--red-text);">Delete</button>
-          </div>
-        </div>
-      </div>`;
+    card.innerHTML=`<div class="viewing-card-header" onclick="toggleViewing(this)"><div style="flex:1;"><div style="font-size:14px;font-weight:500;">${f.address}</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">${f.date||''}${meta?' · '+meta:''}</div></div><div style="padding:4px 10px;border-radius:var(--r);background:${sc.bg};color:${sc.tc};font-size:13px;font-weight:500;margin-right:8px;">${f.score||'—'}</div><i class="ti ti-chevron-down" style="font-size:16px;color:var(--text3);transition:transform 0.2s;"></i></div><div class="viewing-card-body"><div style="padding-top:12px;"><div class="detail-grid">${di('Asking price',price)}${di('Price/sqft',f.ppsf)}${di('Sq ft',f.sqft)}${di('Floor',f.floor)}${di('Station',f.station+(f.walk?' · '+f.walk+'min':''))}${di('EPC',f.epc)}${di('Council tax',f.ctax)}${di('Tenure',f.tenure)}${di('Lease years',f.lease)}${di('Ground rent',f.grent?'£'+f.grent+'/yr':'')}${di('Service charge',f.scharge?'£'+parseInt(f.scharge).toLocaleString()+'/yr':'')}${di('SC trend',f.sctrend)}${di('EWS1',f.ews1)}${di('Agent',f.agent)}${di('Commute',f.commute?f.commute+'min':'')}${di('Photos',f.photoCount?f.photoCount+'':'')}</div>${f.impression?`<div class="note-block"><div class="note-label">First impression</div><div class="note-text">${f.impression}</div></div>`:''}${f.pros?`<div class="note-block"><div class="note-label">Pros</div><div class="note-text">${f.pros}</div></div>`:''}${f.cons?`<div class="note-block"><div class="note-label">Cons</div><div class="note-text">${f.cons}</div></div>`:''}${f.repairs?`<div class="note-block"><div class="note-label">Repairs</div><div class="note-text">${f.repairs}</div></div>`:''}${f.guttext?`<div class="note-block"><div class="note-label">Gut feeling</div><div class="note-text">${f.guttext}</div></div>`:''}${f.link?`<div style="margin-top:10px;"><a href="${f.link}" target="_blank" style="font-size:13px;color:var(--blue-text);display:flex;align-items:center;gap:4px;"><i class="ti ti-external-link" style="font-size:14px;"></i>View listing</a></div>`:''}<div style="display:flex;gap:8px;margin-top:14px;"><button onclick="loadFlat(flats.find(x=>x.id==${f.id}))" style="flex:1;padding:9px;font-size:13px;font-weight:500;background:var(--text);color:var(--bg);border:none;border-radius:var(--r);cursor:pointer;">Edit</button><button onclick="deleteFlat(${f.id},event)" style="padding:9px 14px;font-size:13px;border-radius:var(--r);cursor:pointer;border:0.5px solid var(--border);background:var(--bg);color:var(--red-text);">Delete</button></div></div></div>`;
     container.appendChild(card);
   });
 }
-function toggleViewing(header){
-  const body=header.nextElementSibling,icon=header.querySelector('.ti-chevron-down');
-  const open=body.classList.toggle('open');
-  if(icon)icon.style.transform=open?'rotate(180deg)':'';
-}
+function toggleViewing(header){const body=header.nextElementSibling,icon=header.querySelector('.ti-chevron-down');const open=body.classList.toggle('open');if(icon)icon.style.transform=open?'rotate(180deg)':'';}
 function updateCompare(){
   const empty=document.getElementById('cmp-empty'),list=document.getElementById('cmp-list');
   if(!flats.length){empty.style.display='block';list.style.display='none';return;}
   empty.style.display='none';list.style.display='block';
   const rows=document.getElementById('flat-rows');rows.innerHTML='';
   [...flats].sort((a,b)=>b.score-a.score).forEach((f,i)=>{
-    const medals=['🥇','🥈','🥉'],rank=i<3?medals[i]:'#'+(i+1);
-    const sc=scColor(f.score);
+    const medals=['🥇','🥈','🥉'],rank=i<3?medals[i]:'#'+(i+1),sc=scColor(f.score);
     const d=document.createElement('div');d.className='flat-row';
     d.innerHTML=`<div style="font-size:18px;min-width:28px;">${rank}</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">${f.address}</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">${[f.price?'£'+parseInt(f.price).toLocaleString():'',f.beds?f.beds+'bed':'',f.station].filter(Boolean).join(' · ')}</div></div><div style="font-size:14px;font-weight:500;padding:4px 10px;border-radius:var(--r);background:${sc.bg};color:${sc.tc};">${f.score||'—'}</div>`;
     d.onclick=()=>loadFlat(f);rows.appendChild(d);
