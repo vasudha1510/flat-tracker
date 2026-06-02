@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flat Search — Shared View</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#ffffff;--bg2:#f8f7f5;--bg3:#f1efe8;--text:#1a1a18;--text2:#5f5e5a;--text3:#888780;--border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);--green-bg:#eaf3de;--green-text:#3b6d11;--green-border:#c0dd97;--amber-bg:#faeeda;--amber-text:#854f0b;--amber-border:#fac775;--red-bg:#fcebeb;--red-text:#a32d2d;--blue-text:#185fa5;--r:8px;--rl:12px;}
+@media(prefers-color-scheme:dark){:root{--bg:#1e1e1c;--bg2:#2a2a28;--bg3:#222220;--text:#f0ede8;--text2:#a8a5a0;--text3:#6a6866;--border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);--green-bg:#1a2e0a;--green-text:#8fcc4a;--green-border:#3b6d11;--amber-bg:#2e1f05;--amber-text:#f0a030;--amber-border:#854f0b;--red-bg:#2e0f0f;--red-text:#f09090;--blue-text:#6ab4f5;}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:15px;line-height:1.5;min-height:100vh;}
+.app-wrap{max-width:720px;margin:0 auto;padding:1rem;}
+.nav{background:var(--bg);border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:100;padding:0 1rem;}
+.nav-inner{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px;}
+.nav-brand{font-size:15px;font-weight:500;}
+.nav-brand span{font-size:12px;color:var(--text3);margin-left:6px;}
+.sync-status{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);}
+.sync-dot.synced{background:#639922;}
+.sync-dot.syncing{background:#ef9f27;animation:pulse 1s infinite;}
+.sync-dot.error{background:#e24b4a;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.tabs-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tabs{display:flex;gap:2px;padding:8px 1rem;background:var(--bg);border-bottom:0.5px solid var(--border);}
+.tab{padding:7px 13px;border:0.5px solid var(--border);border-radius:var(--r);background:transparent;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);white-space:nowrap;transition:all 0.12s;}
+.tab:hover{background:var(--bg2);}
+.tab.active{background:var(--text);color:var(--bg);border-color:var(--text);}
+.pane{display:none;padding:1.5rem 0;}
+.pane.active{display:block;}
+.slbl{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1.25rem;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.fld{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.fld:last-child{margin-bottom:0;}
+.fld label{font-size:12px;font-weight:500;color:var(--text2);}
+.fld input,.fld select,.fld textarea{font-size:14px;padding:8px 10px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);outline:none;width:100%;}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--border2);}
+.fld textarea{resize:vertical;min-height:64px;}
+.fld input[readonly]{background:var(--bg2);color:var(--text2);}
+.tlr{display:flex;gap:5px;flex-wrap:wrap;}
+.tlb{padding:6px 12px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg2);font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);transition:all 0.12s;}
+.tlb.on{background:var(--bg);border-color:var(--border2);color:var(--text);}
+.star-row{display:flex;gap:4px;}
+.star{width:28px;height:28px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.1s;color:var(--text3);}
+.star.on{background:var(--amber-bg);border-color:var(--amber-border);color:#ba7517;}
+.score-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;font-size:13px;}
+.chki{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border:0.5px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all 0.12s;font-size:13px;line-height:1.4;}
+.chki:hover{background:var(--bg2);}
+.chki.on{background:var(--green-bg);border-color:var(--green-border);}
+.chkb{width:15px;height:15px;min-width:15px;border:1.5px solid var(--border2);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;margin-top:1px;}
+.chki.on .chkb{background:var(--green-text);border-color:var(--green-text);color:white;}
+.score-bar-wrap{background:var(--bg2);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:1rem;}
+.score-bar-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:3px;transition:width 0.3s,background 0.3s;width:0%;}
+.score-num{font-size:28px;font-weight:500;min-width:44px;text-align:right;}
+.verdict-pill{font-size:12px;font-weight:500;padding:4px 10px;border-radius:var(--r);background:var(--bg);color:var(--text3);}
+.btn-primary{flex:1;padding:12px;font-size:15px;font-weight:500;background:var(--text);color:var(--bg);border:none;border-radius:var(--r);cursor:pointer;}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-secondary{padding:12px 18px;font-size:14px;border-radius:var(--r);cursor:pointer;border:0.5px solid var(--border);background:var(--bg);color:var(--text2);}
+.btn-row{display:flex;gap:10px;margin-bottom:1.5rem;}
+.flat-row{display:flex;align-items:center;gap:10px;padding:10px 1.25rem;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);margin-bottom:7px;cursor:pointer;transition:border-color 0.12s;}
+.flat-row:hover{border-color:var(--border2);}
+.mcard{background:var(--bg2);border-radius:var(--r);padding:1rem;text-align:center;}
+.mcard .ml{font-size:12px;color:var(--text2);margin-bottom:4px;}
+.mcard .mv{font-size:18px;font-weight:500;}
+.mcard .ms{font-size:11px;color:var(--text3);margin-top:3px;}
+.photo-upload-area{border:1.5px dashed var(--border2);border-radius:var(--rl);padding:2rem;text-align:center;cursor:pointer;background:var(--bg2);}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px;}
+.photo-thumb{position:relative;border-radius:var(--r);overflow:hidden;aspect-ratio:4/3;border:0.5px solid var(--border);}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;}
+.photo-del{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);border:none;cursor:pointer;color:white;font-size:11px;}
+.gloss-cat{margin-bottom:1.5rem;}
+.gloss-cat-title{font-size:13px;font-weight:500;margin-bottom:8px;padding-bottom:6px;border-bottom:0.5px solid var(--border);}
+.gloss-item{padding:10px 0;border-bottom:0.5px solid var(--border);}
+.gloss-item:last-child{border-bottom:none;}
+.gloss-term{font-size:14px;font-weight:500;margin-bottom:3px;}
+.gloss-def{font-size:13px;color:var(--text2);line-height:1.5;}
+.gloss-tag{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;background:var(--bg2);color:var(--text3);}
+.viewing-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);margin-bottom:12px;overflow:hidden;}
+.viewing-card-header{display:flex;align-items:center;gap:12px;padding:14px 1.25rem;cursor:pointer;}
+.viewing-card-header:hover{background:var(--bg2);}
+.viewing-card-body{padding:0 1.25rem 1.25rem;display:none;border-top:0.5px solid var(--border);}
+.viewing-card-body.open{display:block;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.detail-item{background:var(--bg2);border-radius:var(--r);padding:8px 10px;}
+.detail-label{font-size:11px;color:var(--text3);margin-bottom:2px;}
+.detail-val{font-size:13px;font-weight:500;}
+.note-block{background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-top:8px;}
+.note-label{font-size:11px;color:var(--text3);margin-bottom:4px;}
+.note-text{font-size:13px;line-height:1.5;}
+.banner{border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:12px;align-items:flex-start;}
+.banner.green{background:var(--green-bg);border:0.5px solid var(--green-border);}
+.banner-icon{font-size:18px;flex-shrink:0;margin-top:1px;color:var(--green-text);}
+.banner-title{font-size:13px;font-weight:500;margin-bottom:4px;color:#27500a;}
+.banner-text{font-size:13px;line-height:1.6;color:var(--green-text);}
+.sdlt-band-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:0.5px solid var(--border);}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--text2);}
+.empty-state i{font-size:36px;display:block;margin-bottom:12px;color:var(--text3);}
+.empty-state h3{font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px;}
+.empty-state p{font-size:13px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:var(--rl);font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+#london-map{width:100%;border:0.5px solid var(--border);border-radius:var(--rl);}
+@media(max-width:520px){.g2,.g3{grid-template-columns:1fr;}.detail-grid{grid-template-columns:1fr;}.tabs{gap:4px;padding:8px;}.tab{padding:6px 10px;font-size:12px;}}
+</style>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCIMv0be6l0yhkAQxgUlbnjdg-RBed3mcc&libraries=places,geocoding&callback=initGoogleMaps" async defer></script>
+<style>
+#gmap{width:100%;height:480px;border-radius:var(--rl);border:0.5px solid var(--border);overflow:hidden;}
+.map-detail-panel{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:0.5px solid var(--border);border-radius:var(--rl) var(--rl) 0 0;padding:1.25rem;z-index:1000;transform:translateY(100%);transition:transform 0.3s ease;max-height:80vh;overflow-y:auto;}
+.map-detail-panel.open{transform:translateY(0);}
+.map-panel-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 1rem;}
+.map-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:999;display:none;}
+.map-overlay.show{display:block;}
+</style>
+</head>
+<body>
+<div class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">Flat search <span>Read only</span></div>
+    <div style="font-size:12px;color:var(--text3);" id="sync-label">Loading...</div>
+  </div>
+</div>
+<div class="tabs-scroll">
+  <div class="tabs">
+    
+    <button class="tab active" onclick="showTab('viewings')" id="tab-viewings">Viewings <span id="vcnt"></span></button>
+    
+    <button class="tab" onclick="showTab('compare')" id="tab-compare">Compare</button>
+    <button class="tab" onclick="showTab('map')" id="tab-map">Map</button>
+    <button class="tab" onclick="showTab('glossary')" id="tab-glossary">Glossary</button>
+  </div>
+</div>
+<div class="app-wrap">
+
+<!-- VIEWINGS -->
+<div class="pane active" id="pane-viewings">
+  <div style="background:var(--blue-bg);border:0.5px solid var(--blue-border);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:10px;align-items:center;">
+  <i class="ti ti-eye" style="font-size:18px;color:var(--blue-text);flex-shrink:0;"></i>
+  <div style="font-size:13px;color:var(--blue-text);">This is a shared read-only view. Data updates automatically as new viewings are added.</div>
+</div>
+<div id="vw-empty" class="empty-state"><i class="ti ti-building"></i><h3>No viewings saved yet</h3><p>Log your first viewing using the New viewing tab</p></div>
+  <div id="vw-list" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <div class="slbl" style="margin:0;">All viewings</div>
+      
+    </div>
+    <div id="viewing-cards"></div>
+  </div>
+</div>
+
+<!-- COMPARE -->
+<div class="pane" id="pane-compare">
+  <div id="cmp-empty" class="empty-state"><i class="ti ti-home"></i><h3>No viewings saved yet</h3><p>Save viewings to compare them here</p></div>
+  <div id="cmp-list" style="display:none;"><div style="font-size:12px;color:var(--text3);margin-bottom:1rem;background:var(--bg2);border-radius:var(--r);padding:8px 12px;">Ranked by overall score</div><div id="flat-rows"></div></div>
+</div>
+
+<!-- MAP -->
+<div class="pane" id="pane-map">
+  <div id="map-empty" class="empty-state"><i class="ti ti-map-pin"></i><h3>No viewings saved yet</h3><p>Save viewings to see them plotted on the map</p></div>
+  <div id="map-wrap" style="display:none;">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+      <span>Tap any pin to view property details</span>
+      <div style="display:flex;align-items:center;gap:12px;font-size:12px;">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#e24b4a;display:inline-block;"></span>0–5</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#ef9f27;display:inline-block;"></span>5–7.5</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#639922;display:inline-block;"></span>7.5+</span>
+      </div>
+    </div>
+    <div id="gmap"></div>
+    <div id="map-geocoding-status" style="font-size:12px;color:var(--text3);margin-top:8px;text-align:center;"></div>
+    <div style="margin-top:1.25rem;">
+      <div class="slbl">All viewings</div>
+      <div id="map-flat-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAP DETAIL PANEL -->
+<div class="map-overlay" id="map-overlay" onclick="closeMapPanel()"></div>
+<div class="map-detail-panel" id="map-detail-panel">
+  <div class="map-panel-handle"></div>
+  <div id="map-detail-content"></div>
+</div>
+
+<!-- GLOSSARY -->
+<div class="pane" id="pane-glossary">
+  <div class="fld" style="margin-bottom:1rem;"><input type="text" id="gloss-search" placeholder="Search terms..." oninput="filterGlossary(this.value)"></div>
+  <div id="gloss-content"></div>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ───
+const JSONBIN_KEY = '$2a$10$5jwn8B78EB7Wb84e0nxJa.HKVM5Bg8hhnE8sadWbMJTxZWgHzBEFm';
+const JSONBIN_BASE = 'https://api.jsonbin.io/v3';
+const CLD_CLOUD = 'ddl99l6kv';
+const CLD_PRESET = 'Flat Viewing';
+const BIN_ID = '6a10ff636877513b27b9d70c';
+
+// ─── JSONBIN ───
+async function jbRequest(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY }
+  };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res = await fetch(JSONBIN_BASE + path, opts);
+  if (!res.ok) throw new Error('JSONBin error: ' + res.status);
+  return res.json();
+}
+
+async function ensureBin() {
+  return BIN_ID;
+}
+
+
+
+async function loadFromCloud() {
+  if (!BIN_ID) return;
+  setSyncStatus('syncing', 'Loading...');
+  try {
+    const res = await jbRequest('GET', '/b/' + BIN_ID + '/latest');
+    flats = res.record.viewings || [];
+    lenders = res.record.lenders || [];
+    document.getElementById('sync-label').textContent='Live';setSyncStatus&&setSyncStatus('synced','Synced ✓');
+    updateAll();
+    renderLenders();
+  } catch (e) {
+    document.getElementById('sync-label').textContent='Offline';setSyncStatus&&setSyncStatus('error','Offline');
+    try {
+      const backup = JSON.parse(localStorage.getItem('flt_backup') || '{}');
+      flats = backup.viewings || [];
+      lenders = backup.lenders || [];
+    } catch (_) {}
+    updateAll();
+    renderLenders();
+    showToast('Using local backup — check connection');
+  }
+}
+
+async function saveAllToCloud() {
+  setSyncStatus('syncing', 'Saving...');
+  try {
+    const id = await ensureBin();
+    await jbRequest('PUT', '/b/' + id, { viewings: flats, lenders });
+    setSyncStatus('synced', 'Saved ✓');
+    localStorage.setItem('flt_backup', JSON.stringify({ viewings: flats, lenders }));
+  } catch (e) {
+    setSyncStatus('error', 'Save failed');
+    showToast('Could not save — check your connection');
+    throw e;
+  }
+}
+
+// ─── CLOUDINARY PHOTO UPLOAD ───
+async function uploadPhoto(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLD_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLD_CLOUD}/image/upload`, {
+    method: 'POST', body: fd
+  });
+  if (!res.ok) throw new Error('Upload failed');
+  const data = await res.json();
+  return data.secure_url;
+}
+
+// ─── DATA ───
+const SCORE_KEYS=[['light','Natural light'],['space','Space & layout'],['condition','Condition'],['noise','Noise level'],['location','Location & transport'],['value','Value for money'],['building','Building quality'],['gut','Gut feeling']];
+const CHECKS=['Lease years confirmed','Service charge amount','Reserve fund exists','Major works asked','EWS1/cladding checked','Boiler age checked','Damp/mould inspection','Cracks or leaks checked','Sound insulation tested','Natural light assessed','Storage measured','Ventilation checked','Seller reason asked','Time on market checked','Price reductions checked','Chain status confirmed','Area at night considered','Commute timed'];
+const TOGGLES=[['tl-res',['Yes','No','Unknown']],['tl-mw',['Yes','No','Unknown']],['tl-lod',['Yes','Maybe','No']],['tl-rnt',['Yes','Maybe','No']],['tl-bal',['Yes','No']],['tl-lft',['Yes','No']],['tl-prk',['Yes','No']],['tl-net',['Good','Poor','Unknown']],['tl-pr',['Yes','No','Unknown']],['tl-ch',['Yes','No','Unknown']]];
+const GIFT_CHECKS=[{t:'Gifted deposit letter signed by father',s:'States it is a gift with no interest in the property'},{t:"Father's bank statements (3 months)",s:'Showing the funds and their origin'},{t:'Source of funds explanation',s:'How the money was accumulated'},{t:'Proof of relationship',s:'Some lenders require evidence you are related'},{t:'International transfer documentation',s:'SWIFT/wire transfer records'},{t:'Indian FEMA/RBI compliance confirmed',s:'Transfer within LRS limits (~$250,000/yr)'},{t:'Funds in your UK account 30+ days before completion',s:'Some lenders require this'},{t:'Solicitor informed of gift source',s:'Required for AML obligations'}];
+const GLOSSARY=[
+  {cat:'The buying process',tag:'Process',items:[{t:'Agreement in principle (AIP)',d:'A conditional offer from a lender confirming how much they would likely lend you. Also called Decision in Principle (DIP). You need this before making offers.'},{t:'Conveyancing',d:'The legal process of transferring property ownership. Your solicitor handles searches, checking the title, and exchanging contracts.'},{t:'Exchange of contracts',d:'The point the sale becomes legally binding. Pulling out after exchange means losing your deposit.'},{t:'Completion',d:'The day money transfers and you get the keys. Usually 1–4 weeks after exchange. Buildings insurance must be in place from exchange.'},{t:'Chain',d:'A sequence of linked transactions. Longer chains carry more risk of collapse. Chain-free purchases are lower risk.'},{t:'Gazumping',d:'When a seller accepts a higher offer from another buyer after accepting yours, before exchange. Legal but unethical. Move quickly to exchange.'},{t:'Searches',d:'Checks your solicitor carries out — local authority, water/drainage, environmental. Usually £250–£500.'},{t:'Title',d:'Legal proof of ownership. Your solicitor checks the Land Registry to confirm the seller owns the property free of restrictions.'}]},
+  {cat:'Mortgages',tag:'Mortgage',items:[{t:'LTV (Loan to Value)',d:'Your mortgage as a percentage of the property value. E.g. £380k on £475k = 80% LTV. Lower LTV = better rates.'},{t:'Fixed rate mortgage',d:'Interest rate locked for a set period (usually 2–5 years). Predictable payments. Reverts to Standard Variable Rate when it ends.'},{t:'Tracker mortgage',d:'Rate tracks the Bank of England base rate. Payments go up or down with rate changes.'},{t:'Repayment mortgage',d:'Each payment covers interest and capital. You own outright by the end of the term. Most common for residential buyers.'},{t:'Remortgage',d:'Switching your mortgage to a new deal, usually when a fixed-rate period ends.'},{t:'Early repayment charge (ERC)',d:'A fee for paying off your mortgage early or switching during a fixed period. Typically 1–5% of the loan.'},{t:'Mortgage broker',d:'An independent adviser who searches for the best deal. Often free (paid by lender commission). Recommended for first-time buyers.'},{t:'Debt-to-income ratio',d:'Lenders assess your income vs debts. Most lend 4–4.5x annual income. Some go to 5.5x for higher earners.'}]},
+  {cat:'Leasehold & ownership',tag:'Leasehold',items:[{t:'Leasehold',d:'You own the property for a fixed number of years but not the land. Almost all London flats are leasehold. Leases under 80 years are hard to mortgage and expensive to extend.'},{t:'Freehold',d:'You own the property and land outright forever. Common for houses, rare for flats.'},{t:'Share of freehold',d:'You own a leasehold flat but also jointly own the freehold with other flat owners. Best of both — cheap lease extension and building control.'},{t:'Lease extension',d:'Adding years to a leasehold. You have a legal right to extend by 90 years. Below 80 years remaining, costs rise sharply.'},{t:'Ground rent',d:'Annual fee paid to the freeholder. Since 2022, new leases cannot charge more than a peppercorn. Check older leases for escalating ground rents.'},{t:'Service charge',d:'Annual fee covering building maintenance. Always ask for 3 years of accounts and check for upcoming major works.'},{t:'Sinking fund / reserve fund',d:'Money set aside for future major repairs. A healthy fund protects leaseholders from large unexpected bills.'},{t:'Section 20 notice',d:'Legal notice when major works over £250 per flat are planned. Gives you the right to consult on costs.'}]},
+  {cat:'Fire safety & cladding',tag:'Safety',items:[{t:'EWS1 form',d:'External Wall System assessment — certifies whether a building\'s walls are safe. Required by most lenders for flats over 11m. Without it the flat may be unmortgageable.'},{t:'Cladding',d:'External building panels. Certain types (e.g. ACM cladding like Grenfell) are a fire risk. Always check cladding status on high-rise or post-war buildings.'},{t:'Building Safety Act 2022',d:'Requires building owners to remediate unsafe cladding, with costs generally not passed to leaseholders for buildings over 11m.'},{t:'Remediation',d:'Fixing unsafe cladding. Can take years and may affect insurance and mortgageability during the process.'}]},
+  {cat:'Surveys & condition',tag:'Survey',items:[{t:'HomeBuyer Report (Level 2)',d:'Most common survey for flats. Visual inspection identifying defects and risks. Costs ~£500–£900. Sufficient for most modern or well-maintained flats.'},{t:'Full structural survey (Level 3)',d:'More comprehensive. Structural analysis and detailed condition report. Costs ~£1,000–£1,500. Recommended for older buildings.'},{t:'Mortgage valuation',d:'The lender\'s assessment of value — protects the lender, not you. Does not replace a proper survey.'},{t:'Damp',d:'Common in older buildings. Rising damp, penetrating damp, or condensation. Look for tide marks, peeling paint, musty smells.'},{t:'Subsidence',d:'Ground beneath the property sinks causing structural movement. Signs include diagonal cracks, sticking doors. Very costly to fix.'}]},
+  {cat:'Costs & tax',tag:'Costs',items:[{t:'Stamp duty land tax (SDLT)',d:'Tax on property purchases. As a first-time buyer: 0% on first £425,000, 5% on £425,001–£625,000. No relief above £625,000. Pay within 14 days of completion.'},{t:'First-time buyer relief',d:'Reduction in SDLT. Only applies if you have never owned residential property anywhere in the world, and the property costs £625,000 or less.'},{t:'Solicitor / conveyancing fees',d:'Typically £1,500–£3,500 for a leasehold flat in London. Get at least three quotes.'},{t:'Land Registry fee',d:'Fee to register new ownership. Typically £135–£295. Your solicitor handles this.'},{t:'Buildings insurance',d:'For a flat, usually arranged by the freeholder and included in service charge. Contents insurance is your responsibility.'}]},
+  {cat:'Making an offer',tag:'Offer',items:[{t:'Asking price',d:'The listed price. In London, flats often sell at or above asking in competitive areas. Research recent sold prices on Rightmove or Land Registry.'},{t:'Offer subject to contract (STC)',d:'An accepted offer is not legally binding until exchange. Either party can still pull out.'},{t:'Best and final offer',d:'All buyers submit their highest offer by a deadline. One chance — no negotiation afterwards.'},{t:'Buyer strength',d:'How attractive you are beyond price. First-time buyers with a mortgage in principle, no chain, and a ready solicitor can beat higher offers.'}]}
+];
+
+
+let scores={},toggleVals={},checked=new Set(),sessionPhotos=[],flats=[],editingId=null;
+
+function setSyncStatus(s,l){const dot=document.getElementById('sync-dot');if(dot)dot.className='sync-dot '+s;const lbl=document.getElementById('sync-label');if(lbl)lbl.textContent=l;}
+function showToast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+
+function init(){
+  document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+  const sg=document.getElementById('score-grid');
+  SCORE_KEYS.forEach(([k,lbl])=>{
+    const d=document.createElement('div');
+    d.innerHTML=`<div class="score-header">${lbl}<span id="sv-${k}" style="font-size:12px;color:var(--text3);">—</span></div><div class="star-row" id="sr-${k}"></div>`;
+    sg.appendChild(d);
+    for(let i=1;i<=5;i++){const s=document.createElement('div');s.className='star';s.innerHTML='&#9733;';s.dataset.v=i;s.onclick=()=>setScore(k,i);document.getElementById('sr-'+k).appendChild(s);}
+  });
+  const cg=document.getElementById('chk-grid');
+  CHECKS.forEach((c,i)=>{
+    const d=document.createElement('div');d.className='chki';
+    d.innerHTML=`<div class="chkb">&#10003;</div><span>${c}</span>`;
+    d.onclick=()=>{checked.has(i)?(checked.delete(i),d.classList.remove('on')):(checked.add(i),d.classList.add('on'));};
+    cg.appendChild(d);
+  });
+  TOGGLES.forEach(([id,opts])=>{
+    const el=document.getElementById(id);if(!el)return;
+    opts.forEach(o=>{
+      const b=document.createElement('button');b.className='tlb';b.textContent=o;b.dataset.group=id;b.dataset.val=o;
+      b.onclick=function(){document.querySelectorAll(`.tlb[data-group="${id}"]`).forEach(x=>x.classList.remove('on'));this.classList.add('on');toggleVals[id]=o;};
+      el.appendChild(b);
+    });
+  });
+  const gc=document.getElementById('gift-checks');
+  GIFT_CHECKS.forEach(item=>{
+    const d=document.createElement('div');d.className='chki';
+    d.innerHTML=`<div class="chkb">&#10003;</div><div><div style="font-size:13px;font-weight:500;">${item.t}</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">${item.s}</div></div>`;
+    d.onclick=()=>d.classList.toggle('on');
+    gc.appendChild(d);
+  });
+  buildGlossary();loadFromCloud();
+}
+
+function setScore(k,v){
+  scores[k]=v;
+  document.getElementById('sr-'+k).querySelectorAll('.star').forEach(s=>s.classList.toggle('on',parseInt(s.dataset.v)<=v));
+  const sv=document.getElementById('sv-'+k);if(sv)sv.textContent=v+'/5';
+  updateScoreBar();
+}
+function updateScoreBar(){
+  const rated=SCORE_KEYS.map(x=>x[0]).filter(k=>scores[k]);
+  if(!rated.length){document.getElementById('snum').textContent='—';document.getElementById('sbar').style.width='0%';const v=document.getElementById('sverdict');v.textContent='/10';v.style.background='';v.style.color='var(--text3)';return;}
+  const avg=rated.reduce((a,k)=>a+scores[k],0)/rated.length,s=Math.round(avg*20)/10;
+  document.getElementById('snum').textContent=s;document.getElementById('sbar').style.width=(s*10)+'%';
+  let bg,tc,vt,bc;
+  if(s>=7.5){bg='var(--green-bg)';tc='var(--green-text)';vt='Strong yes';bc='#639922';}
+  else if(s>=5){bg='var(--amber-bg)';tc='var(--amber-text)';vt='Worth it';bc='#ef9f27';}
+  else{bg='var(--red-bg)';tc='var(--red-text)';vt='Pass';bc='#e24b4a';}
+  document.getElementById('sbar').style.background=bc;
+  const v=document.getElementById('sverdict');v.textContent=vt;v.style.background=bg;v.style.color=tc;
+}
+function calcPPSF(){const p=parseFloat(document.getElementById('f-price').value),s=parseFloat(document.getElementById('f-sqft').value);document.getElementById('f-ppsf').value=(p&&s)?'£'+Math.round(p/s):'';}
+async function handlePhotos(e) {
+  const files = Array.from(e.target.files);
+  e.target.value = '';
+  if (!files.length) return;
+  const label = document.getElementById('photo-upload-label');
+  label.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`;
+  document.getElementById('photo-drop-area').style.opacity = '0.6';
+  document.getElementById('photo-drop-area').style.pointerEvents = 'none';
+  for (const file of files) {
+    try {
+      const url = await uploadPhoto(file);
+      sessionPhotos.push({ url });
+      renderPhotoGrid();
+    } catch (err) {
+      showToast('Photo upload failed — check connection');
+    }
+  }
+  label.textContent = 'Tap to add more photos';
+  document.getElementById('photo-drop-area').style.opacity = '1';
+  document.getElementById('photo-drop-area').style.pointerEvents = 'auto';
+}
+
+function renderPhotoGrid() {
+  const grid = document.getElementById('photo-grid');
+  grid.innerHTML = '';
+  sessionPhotos.forEach((p, i) => {
+    const d = document.createElement('div');
+    d.className = 'photo-thumb';
+    d.innerHTML = `<img src="${p.url}" alt="Photo"><button class="photo-del" onclick="sessionPhotos.splice(${i},1);renderPhotoGrid()">&#10005;</button>`;
+    grid.appendChild(d);
+  });
+}
+
+function renderViewingPhotos(photos, container) {
+  if (!photos || !photos.length) return;
+  const grid = document.createElement('div');
+  grid.className = 'photo-grid';
+  grid.style.marginTop = '12px';
+  photos.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'photo-thumb';
+    d.innerHTML = `<img src="${p.url}" alt="Photo" style="cursor:pointer;" onclick="window.open('${p.url}','_blank')">`;
+    grid.appendChild(d);
+  });
+  container.appendChild(grid);
+}
+// ─── LENDER TRACKER ───
+let lenders = [];
+
+function saveLenders() {
+  saveAllToCloud();
+}
+
+function addLender() {
+  const name = document.getElementById('l-name').value.trim();
+  const amount = parseFloat(document.getElementById('l-amount').value);
+  const rate = parseFloat(document.getElementById('l-rate').value);
+  if (!name || !amount) { alert('Please enter at least a lender name and offer amount'); return; }
+  lenders.push({ id: Date.now(), name, amount, rate: rate || null });
+  saveLenders();
+  document.getElementById('l-name').value = '';
+  document.getElementById('l-amount').value = '';
+  document.getElementById('l-rate').value = '';
+  renderLenders();
+  calcCosts();
+}
+
+function deleteLender(id) {
+  lenders = lenders.filter(l => l.id !== id);
+  saveLenders();
+  renderLenders();
+  calcCosts();
+}
+
+function renderLenders() {
+  const list = document.getElementById('lender-list');
+  if (!lenders.length) { list.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px;">No lenders added yet</div>'; return; }
+  const best = Math.max(...lenders.map(l => l.amount));
+  list.innerHTML = '';
+  [...lenders].sort((a,b) => b.amount - a.amount).forEach(l => {
+    const isBest = l.amount === best;
+    const d = document.createElement('div');
+    d.style.cssText = `display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);border:0.5px solid ${isBest ? 'var(--green-border)' : 'var(--border)'};background:${isBest ? 'var(--green-bg)' : 'var(--bg2)'};`;
+    d.innerHTML = `<div style="flex:1;"><div style="font-size:13px;font-weight:500;color:${isBest ? 'var(--green-text)' : 'var(--text)'};">${l.name}${isBest ? ' <span style="font-size:10px;background:var(--green-text);color:white;padding:2px 6px;border-radius:10px;margin-left:4px;">BEST</span>' : ''}</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">${l.rate ? l.rate + '% rate' : 'Rate not noted'}</div></div><div style="font-size:16px;font-weight:500;color:${isBest ? 'var(--green-text)' : 'var(--text)'};">£${Math.round(l.amount).toLocaleString()}</div><button onclick="deleteLender(${l.id})" style="padding:4px 8px;font-size:11px;color:var(--text3);border:0.5px solid var(--border);border-radius:var(--r);background:transparent;cursor:pointer;">✕</button>`;
+    list.appendChild(d);
+  });
+  // Auto-fill best mortgage into calculator
+  const bestLender = lenders.reduce((a, b) => b.amount > a.amount ? b : a, lenders[0]);
+  document.getElementById('c-mortgage').value = bestLender.amount;
+  if (bestLender.rate) document.getElementById('c-rate').value = bestLender.rate;
+  updateBuyingPower(best);
+}
+
+function updateBuyingPower(bestMortgage) {
+  const gift = parseFloat(document.getElementById('c-gift').value) || 0;
+  const price = parseFloat(document.getElementById('c-price').value) || 0;
+  const maxPrice = bestMortgage + gift;
+  const bp = document.getElementById('buying-power');
+  bp.innerHTML = [
+    {l:'Best mortgage offer',v:'£'+Math.round(bestMortgage).toLocaleString(),s:'from '+lenders.length+' lender'+(lenders.length>1?'s':'')},
+    {l:"Father's contribution",v:'£'+Math.round(gift).toLocaleString(),s:'covers the rest'},
+    {l:'Max property price',v:'£'+Math.round(maxPrice).toLocaleString(),s:price>maxPrice?'⚠️ over budget':'✓ within budget'}
+  ].map(x=>`<div class="mcard"><div class="ml">${x.l}</div><div class="mv">${x.v}</div><div class="ms">${x.s}</div></div>`).join('');
+}
+
+function calcSDLT(price){
+  if(price<=425000)return{bands:[{l:'£0–£425,000',r:'0%',t:0}],total:0};
+  if(price<=625000){const tax=Math.round((price-425000)*0.05);return{bands:[{l:'£0–£425,000',r:'0%',t:0},{l:'£425,001–£'+price.toLocaleString(),r:'5%',t:tax}],total:tax};}
+  let t=0,bands=[];
+  if(price>1500000){const c=price-1500000,tx=Math.round(c*0.12);t+=tx;bands.push({l:'Above £1,500,000',r:'12%',t:tx});}
+  if(price>925000){const c=Math.min(price,1500000)-925000,tx=Math.round(c*0.10);t+=tx;bands.push({l:'£925,001–£1,500,000',r:'10%',t:tx});}
+  if(price>250000){const c=Math.min(price,925000)-250000,tx=Math.round(c*0.05);t+=tx;bands.push({l:'£250,001–£925,000',r:'5%',t:tx});}
+  bands.push({l:'£0–£250,000',r:'0%',t:0});return{bands:bands.reverse(),total:t,warn:true};
+}
+function fmt(n){return'£'+Math.round(n).toLocaleString();}
+function calcCosts(){
+  const price=parseFloat(document.getElementById('c-price').value)||475000,rate=parseFloat(document.getElementById('c-rate').value)||4.5,term=parseFloat(document.getElementById('c-term').value)||25,sol=parseFloat(document.getElementById('c-sol').value)||2500,surv=parseFloat(document.getElementById('c-surv').value)||700,other=parseFloat(document.getElementById('c-other').value)||1500,room=parseFloat(document.getElementById('c-room').value)||900;
+  const mortgage=parseFloat(document.getElementById('c-mortgage').value)||0;
+  const giftAmt=Math.max(price-mortgage,0);
+  document.getElementById('c-gift').value=giftAmt;
+  const loan=mortgage,mr=rate/100/12,n=term*12;
+  const monthly=loan>0?(mr?Math.round(loan*(mr*Math.pow(1+mr,n))/(Math.pow(1+mr,n)-1)):Math.round(loan/n)):0;
+  const ltv=price>0?Math.round((loan/price)*100):0,sdlt=calcSDLT(price);
+  updateBuyingPower(mortgage);
+  const bd=document.getElementById('sdlt-breakdown');bd.innerHTML='';
+  if(sdlt.warn)bd.innerHTML+=`<div style="font-size:12px;background:var(--amber-bg);color:var(--amber-text);padding:7px 10px;border-radius:var(--r);margin-bottom:8px;">Above £625,000 — first-time buyer relief is lost</div>`;
+  sdlt.bands.forEach(b=>{bd.innerHTML+=`<div class="sdlt-band-row"><span style="color:var(--text2);">${b.l}</span><span style="color:var(--text3);margin:0 8px;">${b.r}</span><span style="font-weight:500;">${fmt(b.t)}</span></div>`;});
+  document.getElementById('sdlt-total').textContent=fmt(sdlt.total);
+  const totalUp=sdlt.total+sol+surv+other;
+  const giftVal=Math.max(price-loan,0);
+  document.getElementById('cost-summary').innerHTML=[{l:'Stamp duty',v:fmt(sdlt.total)},{l:'Solicitor fees',v:fmt(sol)},{l:'Survey',v:fmt(surv)},{l:'Other costs',v:fmt(other)},{l:'Total excl. deposit',v:fmt(totalUp)},{l:'Total cash needed',v:fmt(totalUp+giftVal+loan)}].map(x=>`<div class="mcard"><div class="ml">${x.l}</div><div class="mv">${x.v}</div></div>`).join('');
+  // mortgage summary removed — replaced by buying power section
+  document.getElementById('monthly-summary').innerHTML=[{l:'Mortgage',v:fmt(monthly)},{l:'Service charge',v:'Varies',s:'check per flat'},{l:'Bills est.',v:'~£150'}].map(x=>`<div class="mcard"><div class="ml">${x.l}</div><div class="mv">${x.v}</div>${x.s?`<div class="ms">${x.s}</div>`:''}</div>`).join('');
+  document.getElementById('net-cost').textContent=fmt(monthly-room)+'/mo';
+}
+function gv(id){return document.getElementById(id)?.value||'';}
+function computeScore(){const rated=SCORE_KEYS.map(x=>x[0]).filter(k=>scores[k]);if(!rated.length)return 0;return Math.round(rated.reduce((a,k)=>a+scores[k],0)/rated.length*20)/10;}
+async function saveFlat(){
+  const addr=gv('f-addr');if(!addr){alert('Please enter an address');return;}
+  const btn=document.getElementById('save-btn');btn.disabled=true;btn.textContent='Saving...';
+  const flat={id:editingId||Date.now(),address:addr,date:gv('f-date'),price:gv('f-price'),sqft:gv('f-sqft'),ppsf:gv('f-ppsf'),beds:gv('f-beds'),baths:gv('f-baths'),floor:gv('f-floor'),station:gv('f-stn'),walk:gv('f-walk'),epc:gv('f-epc'),ctax:gv('f-ctax'),heating:gv('f-heat'),tenure:gv('f-ten'),lease:gv('f-lease'),grent:gv('f-grent'),scharge:gv('f-sc'),bills:gv('f-bills'),sctrend:gv('f-sct'),ews1:gv('f-ews'),agent:gv('f-agt'),agentc:gv('f-agtc'),link:gv('f-lnk'),whysell:gv('f-why'),timemarket:gv('f-tom'),rentpot:gv('f-rp'),commute:gv('f-com'),mort:gv('f-mort'),impression:gv('f-imp'),pros:gv('f-pro'),cons:gv('f-con'),repairs:gv('f-rep'),guttext:gv('f-gut'),scores:{...scores},toggles:{...toggleVals},checklist:[...checked],score:computeScore(),photos:[...sessionPhotos]};
+  try{
+    if(editingId){flats=flats.map(x=>x.id===editingId?flat:x);}else{flats.push(flat);}
+    await saveAllToCloud();
+    editingId=null;updateAll();clearForm();showTab('viewings');showToast('Viewing saved ✓');
+  }catch(e){if(editingId)flats=flats.map(x=>x.id===editingId?x:x);else flats.pop();}
+  btn.disabled=false;btn.textContent=editingId?'Update viewing':'Save viewing';
+}
+function clearForm(){
+  document.querySelectorAll('#pane-form input,#pane-form select,#pane-form textarea').forEach(el=>{if(el.type==='date')el.value=new Date().toISOString().split('T')[0];else if(!el.readOnly)el.value='';});
+  document.getElementById('f-ppsf').value='';
+  document.querySelectorAll('.tlb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('#pane-form .chki').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('.star').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('[id^="sv-"]').forEach(s=>s.textContent='—');
+  scores={};toggleVals={};checked=new Set();sessionPhotos=[];renderPhotoGrid();updateScoreBar();editingId=null;
+  const lbl=document.getElementById('photo-upload-label');if(lbl)lbl.textContent='Tap to add photos';
+  document.getElementById('save-btn').textContent='Save viewing';
+}
+function loadFlat(f){
+  clearForm();editingId=f.id;
+  const s=(id,v)=>{const el=document.getElementById(id);if(el&&v!=null&&v!=='')el.value=v;};
+  s('f-addr',f.address);s('f-date',f.date);s('f-price',f.price);s('f-sqft',f.sqft);s('f-beds',f.beds);s('f-baths',f.baths);s('f-floor',f.floor);s('f-stn',f.station);s('f-walk',f.walk);s('f-epc',f.epc);s('f-ctax',f.ctax);s('f-heat',f.heating);s('f-ten',f.tenure);s('f-lease',f.lease);s('f-grent',f.grent);s('f-sc',f.scharge);s('f-bills',f.bills);s('f-sct',f.sctrend);s('f-ews',f.ews1);s('f-agt',f.agent);s('f-agtc',f.agentc);s('f-lnk',f.link);s('f-why',f.whysell);s('f-tom',f.timemarket);s('f-rp',f.rentpot);s('f-com',f.commute);s('f-mort',f.mort);s('f-imp',f.impression);s('f-pro',f.pros);s('f-con',f.cons);s('f-rep',f.repairs);s('f-gut',f.guttext);
+  scores={};Object.entries(f.scores||{}).forEach(([k,v])=>setScore(k,v));
+  toggleVals={};Object.entries(f.toggles||{}).forEach(([g,v])=>{const b=document.querySelector(`.tlb[data-group="${g}"][data-val="${v}"]`);if(b){b.classList.add('on');toggleVals[g]=v;}});
+  checked=new Set(f.checklist||[]);
+  document.querySelectorAll('#pane-form .chki').forEach((el,i)=>el.classList.toggle('on',checked.has(i)));
+  sessionPhotos = (f.photos || []);
+  renderPhotoGrid();
+  const lbl = document.getElementById('photo-upload-label');
+  if (lbl) lbl.textContent = sessionPhotos.length ? 'Tap to add more photos' : 'Tap to add photos';
+  calcPPSF();document.getElementById('save-btn').textContent='Update viewing';showTab('form');
+}
+async function deleteFlat(id,e){
+  e.stopPropagation();if(!confirm('Delete this viewing?'))return;
+  flats=flats.filter(f=>f.id!==id);
+  await saveAllToCloud();updateAll();showToast('Viewing deleted');
+}
+function updateAll(){
+  document.getElementById('vcnt').textContent=flats.length?`(${flats.length})`:'';
+  updateViewings();updateCompare();
+  // Refresh map list if map is visible
+  if(document.getElementById('pane-map').classList.contains('active')) renderMapList();
+}
+function scColor(s){if(s>=7.5)return{bg:'var(--green-bg)',tc:'var(--green-text)'};if(s>=5)return{bg:'var(--amber-bg)',tc:'var(--amber-text)'};return{bg:'var(--red-bg)',tc:'var(--red-text)'};}
+function di(label,val){if(!val)return'';return`<div class="detail-item"><div class="detail-label">${label}</div><div class="detail-val">${val}</div></div>`;}
+function updateViewings(){
+  const empty=document.getElementById('vw-empty'),list=document.getElementById('vw-list');
+  if(!flats.length){empty.style.display='block';list.style.display='none';return;}
+  empty.style.display='none';list.style.display='block';
+  const container=document.getElementById('viewing-cards');container.innerHTML='';
+  [...flats].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(f=>{
+    const sc=scColor(f.score),price=f.price?'£'+parseInt(f.price).toLocaleString():'';
+    const meta=[price,f.beds?f.beds+'bed '+f.baths+'bath':'',f.station?f.station+(f.walk?' ('+f.walk+'min)':''):''].filter(Boolean).join(' · ');
+    const card=document.createElement('div');card.className='viewing-card';
+    card.innerHTML=`<div class="viewing-card-header" onclick="toggleViewing(this)"><div style="flex:1;"><div style="font-size:14px;font-weight:500;">${f.address}</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">${f.date||''}${meta?' · '+meta:''}</div></div><div style="padding:4px 10px;border-radius:var(--r);background:${sc.bg};color:${sc.tc};font-size:13px;font-weight:500;margin-right:8px;">${f.score||'—'}</div><i class="ti ti-chevron-down" style="font-size:16px;color:var(--text3);transition:transform 0.2s;"></i></div><div class="viewing-card-body"><div style="padding-top:12px;"><div class="detail-grid">${di('Asking price',price)}${di('Price/sqft',f.ppsf)}${di('Sq ft',f.sqft)}${di('Floor',f.floor)}${di('Station',f.station+(f.walk?' · '+f.walk+'min':''))}${di('EPC',f.epc)}${di('Council tax',f.ctax)}${di('Tenure',f.tenure)}${di('Lease years',f.lease)}${di('Ground rent',f.grent?'£'+f.grent+'/yr':'')}${di('Service charge',f.scharge?'£'+parseInt(f.scharge).toLocaleString()+'/yr':'')}${di('SC trend',f.sctrend)}${di('EWS1',f.ews1)}${di('Agent',f.agent)}${di('Commute',f.commute?f.commute+'min':'')}${f.photos&&f.photos.length?di('Photos',f.photos.length+' saved'):''}</div>${f.impression?`<div class="note-block"><div class="note-label">First impression</div><div class="note-text">${f.impression}</div></div>`:''}${f.pros?`<div class="note-block"><div class="note-label">Pros</div><div class="note-text">${f.pros}</div></div>`:''}${f.cons?`<div class="note-block"><div class="note-label">Cons</div><div class="note-text">${f.cons}</div></div>`:''}${f.repairs?`<div class="note-block"><div class="note-label">Repairs</div><div class="note-text">${f.repairs}</div></div>`:''}${f.guttext?`<div class="note-block"><div class="note-label">Gut feeling</div><div class="note-text">${f.guttext}</div></div>`:''}
+          ${f.photos&&f.photos.length?`<div style="margin-top:12px;"><div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;">Photos (${f.photos.length})</div><div class="photo-grid" style="margin-top:0;">${f.photos.map(p=>`<div class="photo-thumb"><img src="${p.url}" onclick="window.open('${p.url}','_blank')" style="cursor:pointer;" alt="Photo"></div>`).join('')}</div></div>`:''}${f.link?`<div style="margin-top:10px;"><a href="${f.link}" target="_blank" style="font-size:13px;color:var(--blue-text);display:flex;align-items:center;gap:4px;"><i class="ti ti-external-link" style="font-size:14px;"></i>View listing</a></div>`:''}</div></div>`;
+    container.appendChild(card);
+  });
+}
+function toggleViewing(header){const body=header.nextElementSibling,icon=header.querySelector('.ti-chevron-down');const open=body.classList.toggle('open');if(icon)icon.style.transform=open?'rotate(180deg)':'';}
+function updateCompare(){
+  const empty=document.getElementById('cmp-empty'),list=document.getElementById('cmp-list');
+  if(!flats.length){empty.style.display='block';list.style.display='none';return;}
+  empty.style.display='none';list.style.display='block';
+  const rows=document.getElementById('flat-rows');rows.innerHTML='';
+  [...flats].sort((a,b)=>b.score-a.score).forEach((f,i)=>{
+    const medals=['🥇','🥈','🥉'],rank=i<3?medals[i]:'#'+(i+1),sc=scColor(f.score);
+    const d=document.createElement('div');d.className='flat-row';
+    d.innerHTML=`<div style="font-size:18px;min-width:28px;">${rank}</div><div style="flex:1;"><div style="font-size:14px;font-weight:500;">${f.address}</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">${[f.price?'£'+parseInt(f.price).toLocaleString():'',f.beds?f.beds+'bed':'',f.station].filter(Boolean).join(' · ')}</div></div><div style="font-size:14px;font-weight:500;padding:4px 10px;border-radius:var(--r);background:${sc.bg};color:${sc.tc};">${f.score||'—'}</div>`;
+    d.style.cursor='default';rows.appendChild(d);
+  });
+}
+function exportCSV(){
+  if(!flats.length)return;
+  const h=['Address','Date','Price','Sq Ft','£/sqft','Beds','Baths','Floor','Station','Walk','EPC','CTax','Heating','Tenure','Lease yrs','Ground rent','Service charge','Bills','SC trend','EWS1','Agent','Contact','Listing','Why selling','Time on market','Rental pot','Commute','Mortgage','Score','Impression','Pros','Cons','Repairs','Gut feeling','Photos'];
+  const rows=flats.map(f=>[f.address,f.date,f.price,f.sqft,f.ppsf,f.beds,f.baths,f.floor,f.station,f.walk,f.epc,f.ctax,f.heating,f.tenure,f.lease,f.grent,f.scharge,f.bills,f.sctrend,f.ews1,f.agent,f.agentc,f.link,f.whysell,f.timemarket,f.rentpot,f.commute,f.mort,f.score,f.impression,f.pros,f.cons,f.repairs,f.guttext,f.photos?f.photos.length:0].map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"'));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([[h.map(x=>'"'+x+'"').join(','),...rows.map(r=>r.join(','))].join('\n')],{type:'text/csv'}));a.download='London_Flat_Viewings.csv';a.click();
+}
+let gmap = null;
+let geocoder = null;
+let mapMarkers = [];
+let geocodeCache = JSON.parse(localStorage.getItem('geocode_cache') || '{}');
+
+function initGoogleMaps() {
+  geocoder = new google.maps.Geocoder();
+}
+
+function pinColor(score) {
+  if (score >= 7.5) return '#639922';
+  if (score >= 5) return '#ef9f27';
+  if (score > 0) return '#e24b4a';
+  return '#888780';
+}
+
+function markerSvg(color, score) {
+  const label = score ? score.toFixed(1) : '?';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="54" viewBox="0 0 44 54">
+    <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.25"/></filter>
+    <path filter="url(#s)" d="M22 2 C11 2 3 10 3 21 C3 35 22 52 22 52 C22 52 41 35 41 21 C41 10 33 2 22 2Z" fill="${color}"/>
+    <circle cx="22" cy="21" r="12" fill="white" opacity="0.9"/>
+    <text x="22" y="25" text-anchor="middle" font-size="9" font-weight="600" fill="${color}" font-family="-apple-system,sans-serif">${label}</text>
+  </svg>`;
+}
+
+async function geocodeAddress(address) {
+  if (geocodeCache[address]) return geocodeCache[address];
+  return new Promise((resolve) => {
+    geocoder.geocode({ address: address + ', London, UK' }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const loc = { lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() };
+        geocodeCache[address] = loc;
+        try { localStorage.setItem('geocode_cache', JSON.stringify(geocodeCache)); } catch(_) {}
+        resolve(loc);
+      } else {
+        resolve(null);
+      }
+    });
+  });
+}
+
+async function renderMap() {
+  const empty = document.getElementById('map-empty'), wrap = document.getElementById('map-wrap');
+  if (!flats.length) { empty.style.display = 'block'; wrap.style.display = 'none'; return; }
+  empty.style.display = 'none'; wrap.style.display = 'block';
+
+  if (!window.google) { document.getElementById('map-geocoding-status').textContent = 'Loading map...'; return; }
+
+  // Init map centred on London
+  if (!gmap) {
+    gmap = new google.maps.Map(document.getElementById('gmap'), {
+      center: { lat: 51.505, lng: -0.09 },
+      zoom: 12,
+      mapTypeControl: false,
+      fullscreenControl: false,
+      streetViewControl: false,
+      styles: [
+        { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+        { featureType: 'transit', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] }
+      ]
+    });
+  }
+
+  // Clear existing markers
+  mapMarkers.forEach(m => m.setMap(null));
+  mapMarkers = [];
+
+  const status = document.getElementById('map-geocoding-status');
+  status.textContent = `Placing ${flats.length} propert${flats.length > 1 ? 'ies' : 'y'} on map...`;
+
+  const bounds = new google.maps.LatLngBounds();
+  let placed = 0;
+
+  for (const flat of flats) {
+    const loc = await geocodeAddress(flat.address);
+    if (!loc) continue;
+    placed++;
+
+    const color = pinColor(flat.score);
+    const svg = markerSvg(color, flat.score);
+    const marker = new google.maps.Marker({
+      position: loc,
+      map: gmap,
+      title: flat.address,
+      icon: {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+        scaledSize: new google.maps.Size(44, 54),
+        anchor: new google.maps.Point(22, 52)
+      }
+    });
+
+    marker.addListener('click', () => {
+      if (selectedFlatId === flat.id) {
+        openMapPanel(flat);
+      } else {
+        // Tapping an unselected pin selects it first
+        highlightOnMap(flat);
+      }
+    });
+    mapMarkers.push(marker);
+    bounds.extend(loc);
+  }
+
+  if (placed > 0) {
+    gmap.fitBounds(bounds);
+    if (placed === 1) gmap.setZoom(15);
+    status.textContent = '';
+  } else {
+    status.textContent = 'Could not place any properties — check addresses include a postcode';
+  }
+  renderMapList();
+}
+
+function renderMapList() {
+  const container = document.getElementById('map-flat-list');
+  if (!container) return;
+  container.innerHTML = '';
+  const sorted = [...flats].sort((a, b) => b.score - a.score);
+  sorted.forEach(f => {
+    const sc = scColor(f.score);
+    const price = f.price ? '£' + parseInt(f.price).toLocaleString() : '';
+    const meta = [price, f.beds ? f.beds + 'bed' : '', f.station].filter(Boolean).join(' · ');
+    const d = document.createElement('div');
+    d.className = 'flat-row';
+    d.id = 'map-row-' + f.id;
+    d.style.cssText = 'transition:all 0.2s;';
+    d.innerHTML = `
+      <div style="width:10px;height:10px;border-radius:50%;background:${pinColor(f.score)};flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:500;">${f.address}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;">${meta}</div>
+      </div>
+      <div style="font-size:13px;font-weight:500;padding:3px 9px;border-radius:var(--r);background:${sc.bg};color:${sc.tc};">${f.score || '—'}</div>
+      <i class="ti ti-map-pin" style="font-size:15px;color:var(--text3);"></i>`;
+    d.onclick = () => highlightOnMap(f);
+    container.appendChild(d);
+  });
+}
+
+let selectedFlatId = null;
+
+function highlightOnMap(flat) {
+  // Scroll map into view
+  document.getElementById('gmap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // If same flat tapped again, deselect
+  if (selectedFlatId === flat.id) { resetMapSelection(); return; }
+  selectedFlatId = flat.id;
+
+  // Highlight the row, reset others
+  document.querySelectorAll('[id^="map-row-"]').forEach(r => {
+    r.style.background = '';
+    r.style.borderColor = '';
+  });
+  const row = document.getElementById('map-row-' + flat.id);
+  if (row) { row.style.background = 'var(--green-bg)'; row.style.borderColor = 'var(--green-border)'; }
+
+  // Update all markers — enlarge selected, dim others
+  mapMarkers.forEach(m => {
+    const isSelected = m.getTitle() === flat.address;
+    const f = flats.find(x => x.address === m.getTitle());
+    const color = pinColor(f ? f.score : 0);
+    const svg = isSelected ? markerSvgSelected(color, f ? f.score : null) : markerSvgDimmed(color, f ? f.score : null);
+    m.setIcon({
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new google.maps.Size(isSelected ? 54 : 36, isSelected ? 66 : 44),
+      anchor: new google.maps.Point(isSelected ? 27 : 18, isSelected ? 64 : 42)
+    });
+    if (isSelected) { gmap.panTo(m.getPosition()); gmap.setZoom(15); }
+  });
+}
+
+function markerSvgSelected(color, score) {
+  const label = score ? score.toFixed(1) : '?';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="54" height="66" viewBox="0 0 54 66">
+    <filter id="s"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.35"/></filter>
+    <path filter="url(#s)" d="M27 2 C13 2 3 12 3 25 C3 42 27 64 27 64 C27 64 51 42 51 25 C51 12 41 2 27 2Z" fill="${color}" stroke="white" stroke-width="2.5"/>
+    <circle cx="27" cy="25" r="14" fill="white" opacity="0.95"/>
+    <text x="27" y="30" text-anchor="middle" font-size="11" font-weight="700" fill="${color}" font-family="-apple-system,sans-serif">${label}</text>
+  </svg>`;
+}
+
+function markerSvgDimmed(color, score) {
+  const label = score ? score.toFixed(1) : '?';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 44 54">
+    <path d="M22 2 C11 2 3 10 3 21 C3 35 22 52 22 52 C22 52 41 35 41 21 C41 10 33 2 22 2Z" fill="${color}" opacity="0.35"/>
+    <circle cx="22" cy="21" r="12" fill="white" opacity="0.6"/>
+    <text x="22" y="25" text-anchor="middle" font-size="9" font-weight="600" fill="${color}" opacity="0.5" font-family="-apple-system,sans-serif">${label}</text>
+  </svg>`;
+}
+
+function resetMapSelection() {
+  selectedFlatId = null;
+
+  // Reset all rows
+  document.querySelectorAll('[id^="map-row-"]').forEach(r => {
+    r.style.background = '';
+    r.style.borderColor = '';
+  });
+
+  // Restore all markers to normal
+  mapMarkers.forEach(m => {
+    const f = flats.find(x => x.address === m.getTitle());
+    const color = pinColor(f ? f.score : 0);
+    const svg = markerSvg(color, f ? f.score : null);
+    m.setIcon({
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new google.maps.Size(44, 54),
+      anchor: new google.maps.Point(22, 52)
+    });
+  });
+
+  // Fit all markers back in view
+  if (mapMarkers.length > 0) {
+    const bounds = new google.maps.LatLngBounds();
+    mapMarkers.forEach(m => bounds.extend(m.getPosition()));
+    gmap.fitBounds(bounds);
+    if (mapMarkers.length === 1) gmap.setZoom(15);
+  }
+}
+
+function openMapPanel(flat) {
+  const price = flat.price ? '£' + parseInt(flat.price).toLocaleString() : '';
+  const sc = scColor(flat.score);
+  const content = document.getElementById('map-detail-content');
+  content.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:1rem;">
+      <div style="flex:1;">
+        <div style="font-size:16px;font-weight:500;line-height:1.3;">${flat.address}</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:4px;">${[price, flat.beds ? flat.beds + 'bed ' + flat.baths + 'bath' : '', flat.station ? flat.station + (flat.walk ? ' · ' + flat.walk + 'min' : '') : ''].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div style="padding:6px 12px;border-radius:var(--r);background:${sc.bg};color:${sc.tc};font-size:16px;font-weight:500;flex-shrink:0;">${flat.score || '—'}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;">
+      ${di('Tenure', flat.tenure)}${di('Lease years', flat.lease)}
+      ${di('Service charge', flat.scharge ? '£' + parseInt(flat.scharge).toLocaleString() + '/yr' : '')}
+      ${di('EWS1', flat.ews1)}${di('EPC', flat.epc)}${di('Council tax', flat.ctax)}
+      ${di('Commute', flat.commute ? flat.commute + ' min' : '')}
+      ${di('Agent', flat.agent)}
+    </div>
+    ${flat.impression ? `<div class="note-block"><div class="note-label">First impression</div><div class="note-text">${flat.impression}</div></div>` : ''}
+    ${flat.pros ? `<div class="note-block"><div class="note-label">Pros</div><div class="note-text">${flat.pros}</div></div>` : ''}
+    ${flat.cons ? `<div class="note-block"><div class="note-label">Cons</div><div class="note-text">${flat.cons}</div></div>` : ''}
+    ${flat.photos && flat.photos.length ? `<div style="margin-top:12px;"><div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;">Photos</div><div class="photo-grid" style="margin-top:0;">${flat.photos.map(p => `<div class="photo-thumb"><img src="${p.url}" onclick="window.open('${p.url}','_blank')" style="cursor:pointer;" alt="Photo"></div>`).join('')}</div></div>` : ''}
+    <div style="display:flex;gap:8px;margin-top:1rem;">
+      
+      ${flat.link ? `<a href="${flat.link}" target="_blank" style="padding:10px 14px;font-size:13px;border-radius:var(--r);border:0.5px solid var(--border);background:var(--bg);color:var(--text2);text-decoration:none;display:flex;align-items:center;gap:4px;"><i class="ti ti-external-link" style="font-size:14px;"></i>Listing</a>` : ''}
+    </div>`;
+
+  document.getElementById('map-detail-panel').classList.add('open');
+  document.getElementById('map-overlay').classList.add('show');
+}
+
+function closeMapPanel() {
+  document.getElementById('map-detail-panel').classList.remove('open');
+  document.getElementById('map-overlay').classList.remove('show');
+  resetMapSelection();
+}
+function buildGlossary(){
+  const container=document.getElementById('gloss-content');
+  GLOSSARY.forEach(cat=>{
+    const sec=document.createElement('div');sec.className='gloss-cat';
+    sec.innerHTML=`<div class="gloss-cat-title">${cat.cat}</div>`;
+    cat.items.forEach(item=>{
+      const d=document.createElement('div');d.className='gloss-item';d.dataset.term=(item.t+' '+item.d).toLowerCase();
+      d.innerHTML=`<div class="gloss-term">${item.t}<span class="gloss-tag">${cat.tag}</span></div><div class="gloss-def">${item.d}</div>`;
+      sec.appendChild(d);
+    });
+    container.appendChild(sec);
+  });
+}
+function filterGlossary(q){
+  const query=q.toLowerCase();
+  document.querySelectorAll('.gloss-item').forEach(item=>item.style.display=(!query||item.dataset.term.includes(query))?'':'none');
+  document.querySelectorAll('.gloss-cat').forEach(cat=>cat.style.display=Array.from(cat.querySelectorAll('.gloss-item')).some(x=>x.style.display!=='none')?'':'none');
+}
+function showTab(t){
+  // Read-only: ignore form and costs tabs
+  if(t==='form'||t==='costs') return;
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pane-'+t).classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='map')renderMap();
+}
+init();
+</script>
+</body>
+</html>
