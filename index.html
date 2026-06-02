@@ -167,14 +167,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
   <div class="slbl">Photos</div>
   <div class="card">
-    <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
+    <div class="photo-upload-area" id="photo-drop-area" onclick="document.getElementById('photo-input').click()">
       <i class="ti ti-camera" style="font-size:28px;color:var(--text3);display:block;margin-bottom:8px;"></i>
-      <div style="font-size:14px;font-weight:500;color:var(--text2);">Tap to add photos</div>
+      <div style="font-size:14px;font-weight:500;color:var(--text2);" id="photo-upload-label">Tap to add photos</div>
       <div style="font-size:12px;color:var(--text3);margin-top:4px;">Kitchen, bathroom, building entrance, street view</div>
     </div>
     <input type="file" id="photo-input" accept="image/*" multiple style="display:none;" onchange="handlePhotos(event)">
     <div class="photo-grid" id="photo-grid"></div>
-    <div style="font-size:12px;color:var(--text3);background:var(--bg2);border-radius:var(--r);padding:8px 10px;margin-top:8px;">Photos are stored for this session. For permanent photos, paste a Google Photos shared album link in the listing field.</div>
+    <div style="font-size:12px;color:var(--text3);background:var(--bg2);border-radius:var(--r);padding:8px 10px;margin-top:8px;"><i class="ti ti-cloud-upload" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>Photos are uploaded to the cloud and saved permanently with each viewing — visible on all your devices.</div>
   </div>
   <div class="slbl">Your notes</div>
   <div class="card">
@@ -289,11 +289,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── JSONBIN CONFIG ───
+// ─── CONFIG ───
 const JSONBIN_KEY = '$2a$10$5jwn8B78EB7Wb84e0nxJa.HKVM5Bg8hhnE8sadWbMJTxZWgHzBEFm';
 const JSONBIN_BASE = 'https://api.jsonbin.io/v3';
+const CLD_CLOUD = 'ddl99l6kv';
+const CLD_PRESET = 'Flat Viewing';
 let BIN_ID = localStorage.getItem('jb_bin_id') || null;
 
+// ─── JSONBIN ───
 async function jbRequest(method, path, body) {
   const opts = {
     method,
@@ -307,7 +310,7 @@ async function jbRequest(method, path, body) {
 
 async function ensureBin() {
   if (BIN_ID) return BIN_ID;
-  const res = await jbRequest('POST', '/b', { viewings: [] });
+  const res = await jbRequest('POST', '/b', { viewings: [], lenders: [] });
   BIN_ID = res.metadata.id;
   localStorage.setItem('jb_bin_id', BIN_ID);
   return BIN_ID;
@@ -319,12 +322,19 @@ async function loadFromCloud() {
     const id = await ensureBin();
     const res = await jbRequest('GET', '/b/' + id + '/latest');
     flats = res.record.viewings || [];
+    lenders = res.record.lenders || [];
     setSyncStatus('synced', 'Synced ✓');
     updateAll();
+    renderLenders();
   } catch (e) {
     setSyncStatus('error', 'Offline');
-    try { flats = JSON.parse(localStorage.getItem('flt_backup') || '[]'); } catch (_) {}
+    try {
+      const backup = JSON.parse(localStorage.getItem('flt_backup') || '{}');
+      flats = backup.viewings || [];
+      lenders = backup.lenders || [];
+    } catch (_) {}
     updateAll();
+    renderLenders();
     showToast('Using local backup — check connection');
   }
 }
@@ -333,14 +343,27 @@ async function saveAllToCloud() {
   setSyncStatus('syncing', 'Saving...');
   try {
     const id = await ensureBin();
-    await jbRequest('PUT', '/b/' + id, { viewings: flats });
+    await jbRequest('PUT', '/b/' + id, { viewings: flats, lenders });
     setSyncStatus('synced', 'Saved ✓');
-    localStorage.setItem('flt_backup', JSON.stringify(flats));
+    localStorage.setItem('flt_backup', JSON.stringify({ viewings: flats, lenders }));
   } catch (e) {
     setSyncStatus('error', 'Save failed');
     showToast('Could not save — check your connection');
     throw e;
   }
+}
+
+// ─── CLOUDINARY PHOTO UPLOAD ───
+async function uploadPhoto(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLD_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLD_CLOUD}/image/upload`, {
+    method: 'POST', body: fd
+  });
+  if (!res.ok) throw new Error('Upload failed');
+  const data = await res.json();
+  return data.secure_url;
 }
 
 // ─── DATA ───
@@ -417,13 +440,57 @@ function updateScoreBar(){
   const v=document.getElementById('sverdict');v.textContent=vt;v.style.background=bg;v.style.color=tc;
 }
 function calcPPSF(){const p=parseFloat(document.getElementById('f-price').value),s=parseFloat(document.getElementById('f-sqft').value);document.getElementById('f-ppsf').value=(p&&s)?'£'+Math.round(p/s):'';}
-function handlePhotos(e){Array.from(e.target.files).forEach(file=>{const r=new FileReader();r.onload=ev=>{sessionPhotos.push({dataUrl:ev.target.result});renderPhotoGrid();};r.readAsDataURL(file);});e.target.value='';}
-function renderPhotoGrid(){const grid=document.getElementById('photo-grid');grid.innerHTML='';sessionPhotos.forEach((p,i)=>{const d=document.createElement('div');d.className='photo-thumb';d.innerHTML=`<img src="${p.dataUrl}"><button class="photo-del" onclick="sessionPhotos.splice(${i},1);renderPhotoGrid()">&#10005;</button>`;grid.appendChild(d);});}
+async function handlePhotos(e) {
+  const files = Array.from(e.target.files);
+  e.target.value = '';
+  if (!files.length) return;
+  const label = document.getElementById('photo-upload-label');
+  label.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`;
+  document.getElementById('photo-drop-area').style.opacity = '0.6';
+  document.getElementById('photo-drop-area').style.pointerEvents = 'none';
+  for (const file of files) {
+    try {
+      const url = await uploadPhoto(file);
+      sessionPhotos.push({ url });
+      renderPhotoGrid();
+    } catch (err) {
+      showToast('Photo upload failed — check connection');
+    }
+  }
+  label.textContent = 'Tap to add more photos';
+  document.getElementById('photo-drop-area').style.opacity = '1';
+  document.getElementById('photo-drop-area').style.pointerEvents = 'auto';
+}
+
+function renderPhotoGrid() {
+  const grid = document.getElementById('photo-grid');
+  grid.innerHTML = '';
+  sessionPhotos.forEach((p, i) => {
+    const d = document.createElement('div');
+    d.className = 'photo-thumb';
+    d.innerHTML = `<img src="${p.url}" alt="Photo"><button class="photo-del" onclick="sessionPhotos.splice(${i},1);renderPhotoGrid()">&#10005;</button>`;
+    grid.appendChild(d);
+  });
+}
+
+function renderViewingPhotos(photos, container) {
+  if (!photos || !photos.length) return;
+  const grid = document.createElement('div');
+  grid.className = 'photo-grid';
+  grid.style.marginTop = '12px';
+  photos.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'photo-thumb';
+    d.innerHTML = `<img src="${p.url}" alt="Photo" style="cursor:pointer;" onclick="window.open('${p.url}','_blank')">`;
+    grid.appendChild(d);
+  });
+  container.appendChild(grid);
+}
 // ─── LENDER TRACKER ───
-let lenders = JSON.parse(localStorage.getItem('lenders') || '[]');
+let lenders = [];
 
 function saveLenders() {
-  localStorage.setItem('lenders', JSON.stringify(lenders));
+  saveAllToCloud();
 }
 
 function addLender() {
@@ -513,7 +580,7 @@ function computeScore(){const rated=SCORE_KEYS.map(x=>x[0]).filter(k=>scores[k])
 async function saveFlat(){
   const addr=gv('f-addr');if(!addr){alert('Please enter an address');return;}
   const btn=document.getElementById('save-btn');btn.disabled=true;btn.textContent='Saving...';
-  const flat={id:editingId||Date.now(),address:addr,date:gv('f-date'),price:gv('f-price'),sqft:gv('f-sqft'),ppsf:gv('f-ppsf'),beds:gv('f-beds'),baths:gv('f-baths'),floor:gv('f-floor'),station:gv('f-stn'),walk:gv('f-walk'),epc:gv('f-epc'),ctax:gv('f-ctax'),heating:gv('f-heat'),tenure:gv('f-ten'),lease:gv('f-lease'),grent:gv('f-grent'),scharge:gv('f-sc'),bills:gv('f-bills'),sctrend:gv('f-sct'),ews1:gv('f-ews'),agent:gv('f-agt'),agentc:gv('f-agtc'),link:gv('f-lnk'),whysell:gv('f-why'),timemarket:gv('f-tom'),rentpot:gv('f-rp'),commute:gv('f-com'),mort:gv('f-mort'),impression:gv('f-imp'),pros:gv('f-pro'),cons:gv('f-con'),repairs:gv('f-rep'),guttext:gv('f-gut'),scores:{...scores},toggles:{...toggleVals},checklist:[...checked],score:computeScore(),photoCount:sessionPhotos.length};
+  const flat={id:editingId||Date.now(),address:addr,date:gv('f-date'),price:gv('f-price'),sqft:gv('f-sqft'),ppsf:gv('f-ppsf'),beds:gv('f-beds'),baths:gv('f-baths'),floor:gv('f-floor'),station:gv('f-stn'),walk:gv('f-walk'),epc:gv('f-epc'),ctax:gv('f-ctax'),heating:gv('f-heat'),tenure:gv('f-ten'),lease:gv('f-lease'),grent:gv('f-grent'),scharge:gv('f-sc'),bills:gv('f-bills'),sctrend:gv('f-sct'),ews1:gv('f-ews'),agent:gv('f-agt'),agentc:gv('f-agtc'),link:gv('f-lnk'),whysell:gv('f-why'),timemarket:gv('f-tom'),rentpot:gv('f-rp'),commute:gv('f-com'),mort:gv('f-mort'),impression:gv('f-imp'),pros:gv('f-pro'),cons:gv('f-con'),repairs:gv('f-rep'),guttext:gv('f-gut'),scores:{...scores},toggles:{...toggleVals},checklist:[...checked],score:computeScore(),photos:[...sessionPhotos]};
   try{
     if(editingId){flats=flats.map(x=>x.id===editingId?flat:x);}else{flats.push(flat);}
     await saveAllToCloud();
@@ -529,6 +596,7 @@ function clearForm(){
   document.querySelectorAll('.star').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('[id^="sv-"]').forEach(s=>s.textContent='—');
   scores={};toggleVals={};checked=new Set();sessionPhotos=[];renderPhotoGrid();updateScoreBar();editingId=null;
+  const lbl=document.getElementById('photo-upload-label');if(lbl)lbl.textContent='Tap to add photos';
   document.getElementById('save-btn').textContent='Save viewing';
 }
 function loadFlat(f){
@@ -539,6 +607,10 @@ function loadFlat(f){
   toggleVals={};Object.entries(f.toggles||{}).forEach(([g,v])=>{const b=document.querySelector(`.tlb[data-group="${g}"][data-val="${v}"]`);if(b){b.classList.add('on');toggleVals[g]=v;}});
   checked=new Set(f.checklist||[]);
   document.querySelectorAll('#pane-form .chki').forEach((el,i)=>el.classList.toggle('on',checked.has(i)));
+  sessionPhotos = (f.photos || []);
+  renderPhotoGrid();
+  const lbl = document.getElementById('photo-upload-label');
+  if (lbl) lbl.textContent = sessionPhotos.length ? 'Tap to add more photos' : 'Tap to add photos';
   calcPPSF();document.getElementById('save-btn').textContent='Update viewing';showTab('form');
 }
 async function deleteFlat(id,e){
@@ -561,7 +633,8 @@ function updateViewings(){
     const sc=scColor(f.score),price=f.price?'£'+parseInt(f.price).toLocaleString():'';
     const meta=[price,f.beds?f.beds+'bed '+f.baths+'bath':'',f.station?f.station+(f.walk?' ('+f.walk+'min)':''):''].filter(Boolean).join(' · ');
     const card=document.createElement('div');card.className='viewing-card';
-    card.innerHTML=`<div class="viewing-card-header" onclick="toggleViewing(this)"><div style="flex:1;"><div style="font-size:14px;font-weight:500;">${f.address}</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">${f.date||''}${meta?' · '+meta:''}</div></div><div style="padding:4px 10px;border-radius:var(--r);background:${sc.bg};color:${sc.tc};font-size:13px;font-weight:500;margin-right:8px;">${f.score||'—'}</div><i class="ti ti-chevron-down" style="font-size:16px;color:var(--text3);transition:transform 0.2s;"></i></div><div class="viewing-card-body"><div style="padding-top:12px;"><div class="detail-grid">${di('Asking price',price)}${di('Price/sqft',f.ppsf)}${di('Sq ft',f.sqft)}${di('Floor',f.floor)}${di('Station',f.station+(f.walk?' · '+f.walk+'min':''))}${di('EPC',f.epc)}${di('Council tax',f.ctax)}${di('Tenure',f.tenure)}${di('Lease years',f.lease)}${di('Ground rent',f.grent?'£'+f.grent+'/yr':'')}${di('Service charge',f.scharge?'£'+parseInt(f.scharge).toLocaleString()+'/yr':'')}${di('SC trend',f.sctrend)}${di('EWS1',f.ews1)}${di('Agent',f.agent)}${di('Commute',f.commute?f.commute+'min':'')}${di('Photos',f.photoCount?f.photoCount+'':'')}</div>${f.impression?`<div class="note-block"><div class="note-label">First impression</div><div class="note-text">${f.impression}</div></div>`:''}${f.pros?`<div class="note-block"><div class="note-label">Pros</div><div class="note-text">${f.pros}</div></div>`:''}${f.cons?`<div class="note-block"><div class="note-label">Cons</div><div class="note-text">${f.cons}</div></div>`:''}${f.repairs?`<div class="note-block"><div class="note-label">Repairs</div><div class="note-text">${f.repairs}</div></div>`:''}${f.guttext?`<div class="note-block"><div class="note-label">Gut feeling</div><div class="note-text">${f.guttext}</div></div>`:''}${f.link?`<div style="margin-top:10px;"><a href="${f.link}" target="_blank" style="font-size:13px;color:var(--blue-text);display:flex;align-items:center;gap:4px;"><i class="ti ti-external-link" style="font-size:14px;"></i>View listing</a></div>`:''}<div style="display:flex;gap:8px;margin-top:14px;"><button onclick="loadFlat(flats.find(x=>x.id==${f.id}))" style="flex:1;padding:9px;font-size:13px;font-weight:500;background:var(--text);color:var(--bg);border:none;border-radius:var(--r);cursor:pointer;">Edit</button><button onclick="deleteFlat(${f.id},event)" style="padding:9px 14px;font-size:13px;border-radius:var(--r);cursor:pointer;border:0.5px solid var(--border);background:var(--bg);color:var(--red-text);">Delete</button></div></div></div>`;
+    card.innerHTML=`<div class="viewing-card-header" onclick="toggleViewing(this)"><div style="flex:1;"><div style="font-size:14px;font-weight:500;">${f.address}</div><div style="font-size:12px;color:var(--text3);margin-top:3px;">${f.date||''}${meta?' · '+meta:''}</div></div><div style="padding:4px 10px;border-radius:var(--r);background:${sc.bg};color:${sc.tc};font-size:13px;font-weight:500;margin-right:8px;">${f.score||'—'}</div><i class="ti ti-chevron-down" style="font-size:16px;color:var(--text3);transition:transform 0.2s;"></i></div><div class="viewing-card-body"><div style="padding-top:12px;"><div class="detail-grid">${di('Asking price',price)}${di('Price/sqft',f.ppsf)}${di('Sq ft',f.sqft)}${di('Floor',f.floor)}${di('Station',f.station+(f.walk?' · '+f.walk+'min':''))}${di('EPC',f.epc)}${di('Council tax',f.ctax)}${di('Tenure',f.tenure)}${di('Lease years',f.lease)}${di('Ground rent',f.grent?'£'+f.grent+'/yr':'')}${di('Service charge',f.scharge?'£'+parseInt(f.scharge).toLocaleString()+'/yr':'')}${di('SC trend',f.sctrend)}${di('EWS1',f.ews1)}${di('Agent',f.agent)}${di('Commute',f.commute?f.commute+'min':'')}${f.photos&&f.photos.length?di('Photos',f.photos.length+' saved'):''}</div>${f.impression?`<div class="note-block"><div class="note-label">First impression</div><div class="note-text">${f.impression}</div></div>`:''}${f.pros?`<div class="note-block"><div class="note-label">Pros</div><div class="note-text">${f.pros}</div></div>`:''}${f.cons?`<div class="note-block"><div class="note-label">Cons</div><div class="note-text">${f.cons}</div></div>`:''}${f.repairs?`<div class="note-block"><div class="note-label">Repairs</div><div class="note-text">${f.repairs}</div></div>`:''}${f.guttext?`<div class="note-block"><div class="note-label">Gut feeling</div><div class="note-text">${f.guttext}</div></div>`:''}
+          ${f.photos&&f.photos.length?`<div style="margin-top:12px;"><div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;">Photos (${f.photos.length})</div><div class="photo-grid" style="margin-top:0;">${f.photos.map(p=>`<div class="photo-thumb"><img src="${p.url}" onclick="window.open('${p.url}','_blank')" style="cursor:pointer;" alt="Photo"></div>`).join('')}</div></div>`:''}${f.link?`<div style="margin-top:10px;"><a href="${f.link}" target="_blank" style="font-size:13px;color:var(--blue-text);display:flex;align-items:center;gap:4px;"><i class="ti ti-external-link" style="font-size:14px;"></i>View listing</a></div>`:''}<div style="display:flex;gap:8px;margin-top:14px;"><button onclick="loadFlat(flats.find(x=>x.id==${f.id}))" style="flex:1;padding:9px;font-size:13px;font-weight:500;background:var(--text);color:var(--bg);border:none;border-radius:var(--r);cursor:pointer;">Edit</button><button onclick="deleteFlat(${f.id},event)" style="padding:9px 14px;font-size:13px;border-radius:var(--r);cursor:pointer;border:0.5px solid var(--border);background:var(--bg);color:var(--red-text);">Delete</button></div></div></div>`;
     container.appendChild(card);
   });
 }
@@ -581,7 +654,7 @@ function updateCompare(){
 function exportCSV(){
   if(!flats.length)return;
   const h=['Address','Date','Price','Sq Ft','£/sqft','Beds','Baths','Floor','Station','Walk','EPC','CTax','Heating','Tenure','Lease yrs','Ground rent','Service charge','Bills','SC trend','EWS1','Agent','Contact','Listing','Why selling','Time on market','Rental pot','Commute','Mortgage','Score','Impression','Pros','Cons','Repairs','Gut feeling','Photos'];
-  const rows=flats.map(f=>[f.address,f.date,f.price,f.sqft,f.ppsf,f.beds,f.baths,f.floor,f.station,f.walk,f.epc,f.ctax,f.heating,f.tenure,f.lease,f.grent,f.scharge,f.bills,f.sctrend,f.ews1,f.agent,f.agentc,f.link,f.whysell,f.timemarket,f.rentpot,f.commute,f.mort,f.score,f.impression,f.pros,f.cons,f.repairs,f.guttext,f.photoCount||0].map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"'));
+  const rows=flats.map(f=>[f.address,f.date,f.price,f.sqft,f.ppsf,f.beds,f.baths,f.floor,f.station,f.walk,f.epc,f.ctax,f.heating,f.tenure,f.lease,f.grent,f.scharge,f.bills,f.sctrend,f.ews1,f.agent,f.agentc,f.link,f.whysell,f.timemarket,f.rentpot,f.commute,f.mort,f.score,f.impression,f.pros,f.cons,f.repairs,f.guttext,f.photos?f.photos.length:0].map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"'));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([[h.map(x=>'"'+x+'"').join(','),...rows.map(r=>r.join(','))].join('\n')],{type:'text/csv'}));a.download='London_Flat_Viewings.csv';a.click();
 }
 function getPostcode(addr){const m=addr.match(/\b([A-Z]{1,2}\d{1,2}[A-Z]?)\b/i);return m?m[1].toUpperCase():null;}
