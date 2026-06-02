@@ -291,6 +291,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div id="gmap"></div>
     <div id="map-geocoding-status" style="font-size:12px;color:var(--text3);margin-top:8px;text-align:center;"></div>
+    <div style="margin-top:1.25rem;">
+      <div class="slbl">All viewings</div>
+      <div id="map-flat-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
   </div>
 </div>
 
@@ -641,6 +645,8 @@ async function deleteFlat(id,e){
 function updateAll(){
   document.getElementById('vcnt').textContent=flats.length?`(${flats.length})`:'';
   updateViewings();updateCompare();
+  // Refresh map list if map is visible
+  if(document.getElementById('pane-map').classList.contains('active')) renderMapList();
 }
 function scColor(s){if(s>=7.5)return{bg:'var(--green-bg)',tc:'var(--green-text)'};if(s>=5)return{bg:'var(--amber-bg)',tc:'var(--amber-text)'};return{bg:'var(--red-bg)',tc:'var(--red-text)'};}
 function di(label,val){if(!val)return'';return`<div class="detail-item"><div class="detail-label">${label}</div><div class="detail-val">${val}</div></div>`;}
@@ -780,6 +786,58 @@ async function renderMap() {
     status.textContent = '';
   } else {
     status.textContent = 'Could not place any properties — check addresses include a postcode';
+  }
+  renderMapList();
+}
+
+function renderMapList() {
+  const container = document.getElementById('map-flat-list');
+  if (!container) return;
+  container.innerHTML = '';
+  const sorted = [...flats].sort((a, b) => b.score - a.score);
+  sorted.forEach(f => {
+    const sc = scColor(f.score);
+    const price = f.price ? '£' + parseInt(f.price).toLocaleString() : '';
+    const meta = [price, f.beds ? f.beds + 'bed' : '', f.station].filter(Boolean).join(' · ');
+    const d = document.createElement('div');
+    d.className = 'flat-row';
+    d.id = 'map-row-' + f.id;
+    d.style.cssText = 'transition:all 0.2s;';
+    d.innerHTML = `
+      <div style="width:10px;height:10px;border-radius:50%;background:${pinColor(f.score)};flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div style="font-size:14px;font-weight:500;">${f.address}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;">${meta}</div>
+      </div>
+      <div style="font-size:13px;font-weight:500;padding:3px 9px;border-radius:var(--r);background:${sc.bg};color:${sc.tc};">${f.score || '—'}</div>
+      <i class="ti ti-map-pin" style="font-size:15px;color:var(--text3);"></i>`;
+    d.onclick = () => highlightOnMap(f);
+    container.appendChild(d);
+  });
+}
+
+function highlightOnMap(flat) {
+  // Scroll map into view
+  document.getElementById('gmap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Highlight the row
+  document.querySelectorAll('.flat-row').forEach(r => r.style.background = '');
+  const row = document.getElementById('map-row-' + flat.id);
+  if (row) { row.style.background = 'var(--green-bg)'; row.style.borderColor = 'var(--green-border)'; }
+
+  // Find the marker and animate it
+  const marker = mapMarkers.find(m => m.getTitle() === flat.address);
+  if (marker) {
+    gmap.panTo(marker.getPosition());
+    gmap.setZoom(15);
+    // Bounce animation
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+    setTimeout(() => marker.setAnimation(null), 1400);
+    // Open detail panel after a short delay
+    setTimeout(() => openMapPanel(flat), 400);
+  } else {
+    // Not yet geocoded — open panel directly
+    openMapPanel(flat);
   }
 }
 
