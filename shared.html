@@ -222,6 +222,7 @@ async function ensureBin() {
 async function loadFromCloud() {
   if (!BIN_ID) return;
   setSyncStatus('syncing', 'Loading...');
+  document.getElementById('sync-label').textContent = 'Loading...';
   try {
     const res = await jbRequest('GET', '/b/' + BIN_ID + '/latest');
     flats = res.record.viewings || [];
@@ -315,12 +316,12 @@ function init(){
     });
   });
   const gc=document.getElementById('gift-checks');
-  GIFT_CHECKS.forEach(item=>{
+  if(gc){GIFT_CHECKS.forEach(item=>{
     const d=document.createElement('div');d.className='chki';
     d.innerHTML=`<div class="chkb">&#10003;</div><div><div style="font-size:13px;font-weight:500;">${item.t}</div><div style="font-size:12px;color:var(--text3);margin-top:2px;">${item.s}</div></div>`;
     d.onclick=()=>d.classList.toggle('on');
     gc.appendChild(d);
-  });
+  });}
   buildGlossary();loadFromCloud();
 }
 
@@ -419,6 +420,7 @@ function deleteLender(id) {
 
 function renderLenders() {
   const list = document.getElementById('lender-list');
+  if (!list) return;
   if (!lenders.length) { list.innerHTML = '<div style="font-size:13px;color:var(--text3);text-align:center;padding:8px;">No lenders added yet</div>'; return; }
   const best = Math.max(...lenders.map(l => l.amount));
   list.innerHTML = '';
@@ -437,6 +439,7 @@ function renderLenders() {
 }
 
 function updateBuyingPower(bestMortgage) {
+  if (!document.getElementById('c-gift')) return;
   const gift = parseFloat(document.getElementById('c-gift').value) || 0;
   const price = parseFloat(document.getElementById('c-price').value) || 0;
   const maxPrice = bestMortgage + gift;
@@ -459,6 +462,7 @@ function calcSDLT(price){
 }
 function fmt(n){return'£'+Math.round(n).toLocaleString();}
 function calcCosts(){
+  if (!document.getElementById('c-price')) return;
   const price=parseFloat(document.getElementById('c-price').value)||475000,rate=parseFloat(document.getElementById('c-rate').value)||4.5,term=parseFloat(document.getElementById('c-term').value)||25,sol=parseFloat(document.getElementById('c-sol').value)||2500,surv=parseFloat(document.getElementById('c-surv').value)||700,other=parseFloat(document.getElementById('c-other').value)||1500,room=parseFloat(document.getElementById('c-room').value)||900;
   const mortgage=parseFloat(document.getElementById('c-mortgage').value)||0;
   const giftAmt=Math.max(price-mortgage,0);
