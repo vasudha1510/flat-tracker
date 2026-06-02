@@ -103,6 +103,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:var(--rl);font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
 #london-map{width:100%;border:0.5px solid var(--border);border-radius:var(--rl);}
+.pin-overlay{position:fixed;inset:0;background:var(--bg3);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem;}
+.pin-box{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:2rem;max-width:360px;width:100%;text-align:center;}
+.pin-title{font-size:20px;font-weight:500;margin-bottom:8px;}
+.pin-sub{font-size:13px;color:var(--text2);margin-bottom:1.5rem;line-height:1.5;}
+.pin-input{font-size:28px;letter-spacing:0.3em;text-align:center;padding:12px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg2);color:var(--text);width:100%;margin-bottom:12px;}
+.pin-btn{width:100%;padding:12px;font-size:15px;font-weight:500;background:var(--text);color:var(--bg);border:none;border-radius:var(--r);cursor:pointer;margin-bottom:8px;}
+.pin-err{font-size:13px;color:var(--red-text);margin-top:8px;min-height:20px;}
+.pin-hint{font-size:12px;color:var(--text3);margin-top:12px;}
 @media(max-width:520px){.g2,.g3{grid-template-columns:1fr;}.detail-grid{grid-template-columns:1fr;}.tabs{gap:4px;padding:8px;}.tab{padding:6px 10px;font-size:12px;}}
 </style>
 </head>
@@ -123,6 +131,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="tab" onclick="showTab('glossary')" id="tab-glossary">Glossary</button>
   </div>
 </div>
+<div class="pin-overlay" id="pin-overlay">
+  <div class="pin-box">
+    <div style="font-size:36px;margin-bottom:12px;">🏠</div>
+    <div class="pin-title">London Flat Tracker</div>
+    <div class="pin-sub" id="pin-sub">Enter your PIN to access your viewings. First time? Choose any 4–8 digit PIN and use the same one on every device and browser.</div>
+    <input class="pin-input" type="number" id="pin-input" placeholder="····" maxlength="8" oninput="this.value=this.value.slice(0,8)">
+    <button class="pin-btn" onclick="submitPin()">Continue</button>
+    <div class="pin-err" id="pin-err"></div>
+    <div class="pin-hint">Use the same PIN on every device to sync your viewings</div>
+  </div>
+</div>
+
 <div class="app-wrap">
 
 <!-- FORM -->
@@ -310,17 +330,32 @@ async function jbRequest(method, path, body) {
 
 async function ensureBin() {
   if (BIN_ID) return BIN_ID;
-  const res = await jbRequest('POST', '/b', { viewings: [], lenders: [] });
-  BIN_ID = res.metadata.id;
-  localStorage.setItem('jb_bin_id', BIN_ID);
-  return BIN_ID;
+  throw new Error('No bin ID — PIN not set');
+}
+
+async function findOrCreateBin(pin) {
+  // Each PIN gets its own bin. We store a small index bin per user
+  // The index bin ID is derived from PIN by creating it with a recognisable name
+  // On first use: create a new data bin and an index bin that holds the mapping
+  // On subsequent use: find the index bin by listing bins and matching PIN hash
+
+  // Simple approach: create one bin per PIN, store bin ID locally keyed by PIN
+  const pinKey = 'jb_pin_bin_' + pin;
+  const existing = localStorage.getItem(pinKey);
+  if (existing) return existing;
+
+  // Not found locally — create a new bin for this PIN
+  const newBin = await jbRequest('POST', '/b', { viewings: [], lenders: [], pin });
+  const newId = newBin.metadata.id;
+  localStorage.setItem(pinKey, newId);
+  return newId;
 }
 
 async function loadFromCloud() {
+  if (!BIN_ID) return;
   setSyncStatus('syncing', 'Loading...');
   try {
-    const id = await ensureBin();
-    const res = await jbRequest('GET', '/b/' + id + '/latest');
+    const res = await jbRequest('GET', '/b/' + BIN_ID + '/latest');
     flats = res.record.viewings || [];
     lenders = res.record.lenders || [];
     setSyncStatus('synced', 'Synced ✓');
@@ -387,6 +422,57 @@ let scores={},toggleVals={},checked=new Set(),sessionPhotos=[],flats=[],editingI
 function setSyncStatus(s,l){document.getElementById('sync-dot').className='sync-dot '+s;document.getElementById('sync-label').textContent=l;}
 function showToast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 
+// ─── PIN SYSTEM ───
+async function submitPin() {
+  const pin = document.getElementById('pin-input').value.trim();
+  const err = document.getElementById('pin-err');
+  if (!pin || pin.length < 4) { err.textContent = 'Please enter at least 4 digits'; return; }
+  err.textContent = '';
+  const btn = document.querySelector('.pin-btn');
+  btn.textContent = 'Searching...'; btn.disabled = true;
+  try {
+    // Search all bins for one matching this PIN
+    const listRes = await jbRequest('GET', '/b?page=1&pageSize=50');
+    const bins = listRes.result || [];
+    let foundId = null;
+    for (const bin of bins) {
+      try {
+        const b = await jbRequest('GET', '/b/' + bin.record._id + '/latest');
+        if (b.record && b.record.pin === pin) { foundId = bin.record._id; break; }
+      } catch(_) {}
+    }
+    if (!foundId) {
+      btn.textContent = 'Creating your space...';
+      const newBin = await jbRequest('POST', '/b', { viewings: [], lenders: [], pin });
+      foundId = newBin.metadata.id;
+    }
+    BIN_ID = foundId;
+    localStorage.setItem('jb_bin_id', BIN_ID);
+    localStorage.setItem('jb_pin', pin);
+    document.getElementById('pin-overlay').style.display = 'none';
+    await loadFromCloud();
+  } catch(e) {
+    err.textContent = 'Could not connect — check your internet connection';
+    btn.textContent = 'Continue'; btn.disabled = false;
+  }
+}
+
+function checkPin() {
+  const savedPin = localStorage.getItem('jb_pin');
+  const savedBin = localStorage.getItem('jb_bin_id');
+  if (savedPin && savedBin) {
+    BIN_ID = savedBin;
+    document.getElementById('pin-overlay').style.display = 'none';
+    loadFromCloud();
+  } else if (savedBin && !savedPin) {
+    // Legacy user — has bin ID but no PIN yet, skip PIN screen
+    BIN_ID = savedBin;
+    document.getElementById('pin-overlay').style.display = 'none';
+    loadFromCloud();
+  }
+  // else show PIN screen
+}
+
 function init(){
   document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
   const sg=document.getElementById('score-grid');
@@ -418,7 +504,7 @@ function init(){
     d.onclick=()=>d.classList.toggle('on');
     gc.appendChild(d);
   });
-  buildGlossary();renderLenders();calcCosts();loadFromCloud();
+  buildGlossary();calcCosts();checkPin();
 }
 
 function setScore(k,v){
