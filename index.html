@@ -105,6 +105,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 #london-map{width:100%;border:0.5px solid var(--border);border-radius:var(--rl);}
 @media(max-width:520px){.g2,.g3{grid-template-columns:1fr;}.detail-grid{grid-template-columns:1fr;}.tabs{gap:4px;padding:8px;}.tab{padding:6px 10px;font-size:12px;}}
 </style>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCIMv0be6l0yhkAQxgUlbnjdg-RBed3mcc&libraries=places,geocoding&callback=initGoogleMaps" async defer></script>
+<style>
+#gmap{width:100%;height:480px;border-radius:var(--rl);border:0.5px solid var(--border);overflow:hidden;}
+.map-detail-panel{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:0.5px solid var(--border);border-radius:var(--rl) var(--rl) 0 0;padding:1.25rem;z-index:1000;transform:translateY(100%);transition:transform 0.3s ease;max-height:80vh;overflow-y:auto;}
+.map-detail-panel.open{transform:translateY(0);}
+.map-panel-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 1rem;}
+.map-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:999;display:none;}
+.map-overlay.show{display:block;}
+</style>
 </head>
 <body>
 <div class="nav">
@@ -270,13 +279,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- MAP -->
 <div class="pane" id="pane-map">
-  <div id="map-empty" class="empty-state"><i class="ti ti-map-pin"></i><h3>No viewings mapped yet</h3><p>Include a postcode in your address (e.g. SE1 3UB)</p></div>
+  <div id="map-empty" class="empty-state"><i class="ti ti-map-pin"></i><h3>No viewings saved yet</h3><p>Save viewings to see them plotted on the map</p></div>
   <div id="map-wrap" style="display:none;">
-    <div style="font-size:13px;color:var(--text2);margin-bottom:10px;">Circle size = viewings in area · Colour = average score</div>
-    <svg id="london-map" viewBox="0 0 600 420" xmlns="http://www.w3.org/2000/svg" style="background:var(--bg2);border-radius:var(--rl);"></svg>
-    <div style="display:flex;align-items:center;gap:16px;margin-top:10px;font-size:12px;color:var(--text2);"><span>Score:</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#e24b4a;display:inline-block;"></span>0–5</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#ef9f27;display:inline-block;"></span>5–7.5</span><span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#639922;display:inline-block;"></span>7.5+</span></div>
-    <div id="map-list" style="margin-top:1rem;display:flex;flex-direction:column;gap:6px;"></div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+      <span>Tap any pin to view property details</span>
+      <div style="display:flex;align-items:center;gap:12px;font-size:12px;">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#e24b4a;display:inline-block;"></span>0–5</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#ef9f27;display:inline-block;"></span>5–7.5</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:50%;background:#639922;display:inline-block;"></span>7.5+</span>
+      </div>
+    </div>
+    <div id="gmap"></div>
+    <div id="map-geocoding-status" style="font-size:12px;color:var(--text3);margin-top:8px;text-align:center;"></div>
   </div>
+</div>
+
+<!-- MAP DETAIL PANEL -->
+<div class="map-overlay" id="map-overlay" onclick="closeMapPanel()"></div>
+<div class="map-detail-panel" id="map-detail-panel">
+  <div class="map-panel-handle"></div>
+  <div id="map-detail-content"></div>
 </div>
 
 <!-- GLOSSARY -->
@@ -378,7 +400,7 @@ const GLOSSARY=[
   {cat:'Costs & tax',tag:'Costs',items:[{t:'Stamp duty land tax (SDLT)',d:'Tax on property purchases. As a first-time buyer: 0% on first £425,000, 5% on £425,001–£625,000. No relief above £625,000. Pay within 14 days of completion.'},{t:'First-time buyer relief',d:'Reduction in SDLT. Only applies if you have never owned residential property anywhere in the world, and the property costs £625,000 or less.'},{t:'Solicitor / conveyancing fees',d:'Typically £1,500–£3,500 for a leasehold flat in London. Get at least three quotes.'},{t:'Land Registry fee',d:'Fee to register new ownership. Typically £135–£295. Your solicitor handles this.'},{t:'Buildings insurance',d:'For a flat, usually arranged by the freeholder and included in service charge. Contents insurance is your responsibility.'}]},
   {cat:'Making an offer',tag:'Offer',items:[{t:'Asking price',d:'The listed price. In London, flats often sell at or above asking in competitive areas. Research recent sold prices on Rightmove or Land Registry.'},{t:'Offer subject to contract (STC)',d:'An accepted offer is not legally binding until exchange. Either party can still pull out.'},{t:'Best and final offer',d:'All buyers submit their highest offer by a deadline. One chance — no negotiation afterwards.'},{t:'Buyer strength',d:'How attractive you are beyond price. First-time buyers with a mortgage in principle, no chain, and a ready solicitor can beat higher offers.'}]}
 ];
-const LONDON_AREAS={'E1':[305,215],'E2':[320,200],'E3':[345,195],'E14':[340,225],'E15':[355,190],'EC1':[285,200],'EC2':[295,205],'EC3':[300,215],'EC4':[285,210],'N1':[280,180],'N4':[265,160],'N7':[270,175],'N8':[265,150],'N16':[290,170],'NW1':[255,180],'NW3':[240,170],'NW5':[255,170],'NW6':[230,175],'NW8':[245,185],'SE1':[295,230],'SE5':[290,250],'SE8':[315,240],'SE10':[335,235],'SE11':[285,240],'SE15':[305,255],'SE16':[315,230],'SE17':[295,243],'SE22':[300,265],'SE23':[305,270],'SW1':[260,233],'SW2':[270,255],'SW3':[250,240],'SW4':[265,250],'SW6':[240,245],'SW7':[245,235],'SW8':[270,243],'SW9':[280,250],'SW10':[242,243],'SW11':[258,248],'SW12':[260,260],'W1':[258,205],'W2':[242,203],'W4':[210,225],'W6':[225,233],'W8':[240,223],'W9':[235,193],'W10':[228,203],'W11':[233,213],'W12':[220,223],'W14':[233,230],'WC1':[278,200],'WC2':[275,210]};
+
 
 let scores={},toggleVals={},checked=new Set(),sessionPhotos=[],flats=[],editingId=null;
 
@@ -655,27 +677,147 @@ function exportCSV(){
   const rows=flats.map(f=>[f.address,f.date,f.price,f.sqft,f.ppsf,f.beds,f.baths,f.floor,f.station,f.walk,f.epc,f.ctax,f.heating,f.tenure,f.lease,f.grent,f.scharge,f.bills,f.sctrend,f.ews1,f.agent,f.agentc,f.link,f.whysell,f.timemarket,f.rentpot,f.commute,f.mort,f.score,f.impression,f.pros,f.cons,f.repairs,f.guttext,f.photos?f.photos.length:0].map(v=>'"'+(v||'').toString().replace(/"/g,'""')+'"'));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([[h.map(x=>'"'+x+'"').join(','),...rows.map(r=>r.join(','))].join('\n')],{type:'text/csv'}));a.download='London_Flat_Viewings.csv';a.click();
 }
-function getPostcode(addr){const m=addr.match(/\b([A-Z]{1,2}\d{1,2}[A-Z]?)\b/i);return m?m[1].toUpperCase():null;}
-function renderMap(){
-  const empty=document.getElementById('map-empty'),wrap=document.getElementById('map-wrap');
-  if(!flats.length){empty.style.display='block';wrap.style.display='none';return;}
-  empty.style.display='none';wrap.style.display='block';
-  const svg=document.getElementById('london-map');svg.innerHTML='';
-  const isDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
-  [[230,145,360,145],[230,145,185,205],[185,205,160,275],[160,275,200,345],[200,345,290,385],[290,385,380,365],[380,365,440,295],[440,295,420,205],[420,205,360,145],[230,145,240,225],[240,225,295,230],[295,230,380,365],[190,200,370,200],[190,200,190,255],[190,255,200,345]].forEach(([x1,y1,x2,y2])=>{const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('stroke',isDark?'#444':'#d3d1c7');l.setAttribute('stroke-width','1.5');svg.appendChild(l);});
-  const poly=document.createElementNS('http://www.w3.org/2000/svg','polyline');poly.setAttribute('points','155,305 185,295 215,285 245,280 275,278 295,282 325,276 355,272 385,272 415,285 445,300 475,315');poly.setAttribute('fill','none');poly.setAttribute('stroke',isDark?'#185fa5':'#85b7eb');poly.setAttribute('stroke-width','5');poly.setAttribute('opacity','0.5');svg.appendChild(poly);
-  const tl=document.createElementNS('http://www.w3.org/2000/svg','text');tl.setAttribute('x','195');tl.setAttribute('y','295');tl.setAttribute('font-size','10');tl.setAttribute('fill',isDark?'#378add':'#185fa5');tl.setAttribute('opacity','0.9');tl.textContent='River Thames';svg.appendChild(tl);
-  const areaMap={};
-  flats.forEach(f=>{const pc=getPostcode(f.address);if(!pc)return;const base=pc.replace(/\d[A-Z]{2}$/,'');const coords=LONDON_AREAS[base]||LONDON_AREAS[pc];if(!coords)return;if(!areaMap[base])areaMap[base]={coords,flats:[],scores:[]};areaMap[base].flats.push(f);if(f.score)areaMap[base].scores.push(f.score);});
-  const ml=document.getElementById('map-list');ml.innerHTML='';
-  Object.entries(areaMap).forEach(([area,data])=>{
-    const [cx,cy]=data.coords,avg=data.scores.length?data.scores.reduce((a,b)=>a+b,0)/data.scores.length:0,r=12+data.flats.length*6;
-    const fill=avg>=7.5?'#639922':avg>=5?'#ef9f27':avg>0?'#e24b4a':'#b4b2a9';
-    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',r);c.setAttribute('fill',fill);c.setAttribute('opacity','0.8');svg.appendChild(c);
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',cx);t.setAttribute('y',avg?cy-2:cy+4);t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','middle');t.setAttribute('font-size','11');t.setAttribute('font-weight','500');t.setAttribute('fill','white');t.textContent=area;svg.appendChild(t);
-    if(avg){const sc=document.createElementNS('http://www.w3.org/2000/svg','text');sc.setAttribute('x',cx);sc.setAttribute('y',cy+10);sc.setAttribute('text-anchor','middle');sc.setAttribute('font-size','9');sc.setAttribute('fill','white');sc.setAttribute('opacity','0.9');sc.textContent=avg.toFixed(1);svg.appendChild(sc);}
-    ml.innerHTML+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);"><span style="width:10px;height:10px;border-radius:50%;background:${fill};display:inline-block;"></span><div style="flex:1;font-size:13px;font-weight:500;">${area}</div><div style="font-size:12px;color:var(--text3);">${data.flats.length} viewing${data.flats.length>1?'s':''}</div><div style="font-size:13px;font-weight:500;">${avg?avg.toFixed(1):'—'}</div></div>`;
+let gmap = null;
+let geocoder = null;
+let mapMarkers = [];
+let geocodeCache = JSON.parse(localStorage.getItem('geocode_cache') || '{}');
+
+function initGoogleMaps() {
+  geocoder = new google.maps.Geocoder();
+}
+
+function pinColor(score) {
+  if (score >= 7.5) return '#639922';
+  if (score >= 5) return '#ef9f27';
+  if (score > 0) return '#e24b4a';
+  return '#888780';
+}
+
+function markerSvg(color, score) {
+  const label = score ? score.toFixed(1) : '?';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="44" height="54" viewBox="0 0 44 54">
+    <filter id="s"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.25"/></filter>
+    <path filter="url(#s)" d="M22 2 C11 2 3 10 3 21 C3 35 22 52 22 52 C22 52 41 35 41 21 C41 10 33 2 22 2Z" fill="${color}"/>
+    <circle cx="22" cy="21" r="12" fill="white" opacity="0.9"/>
+    <text x="22" y="25" text-anchor="middle" font-size="9" font-weight="600" fill="${color}" font-family="-apple-system,sans-serif">${label}</text>
+  </svg>`;
+}
+
+async function geocodeAddress(address) {
+  if (geocodeCache[address]) return geocodeCache[address];
+  return new Promise((resolve) => {
+    geocoder.geocode({ address: address + ', London, UK' }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const loc = { lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() };
+        geocodeCache[address] = loc;
+        try { localStorage.setItem('geocode_cache', JSON.stringify(geocodeCache)); } catch(_) {}
+        resolve(loc);
+      } else {
+        resolve(null);
+      }
+    });
   });
+}
+
+async function renderMap() {
+  const empty = document.getElementById('map-empty'), wrap = document.getElementById('map-wrap');
+  if (!flats.length) { empty.style.display = 'block'; wrap.style.display = 'none'; return; }
+  empty.style.display = 'none'; wrap.style.display = 'block';
+
+  if (!window.google) { document.getElementById('map-geocoding-status').textContent = 'Loading map...'; return; }
+
+  // Init map centred on London
+  if (!gmap) {
+    gmap = new google.maps.Map(document.getElementById('gmap'), {
+      center: { lat: 51.505, lng: -0.09 },
+      zoom: 12,
+      mapTypeControl: false,
+      fullscreenControl: false,
+      streetViewControl: false,
+      styles: [
+        { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+        { featureType: 'transit', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] }
+      ]
+    });
+  }
+
+  // Clear existing markers
+  mapMarkers.forEach(m => m.setMap(null));
+  mapMarkers = [];
+
+  const status = document.getElementById('map-geocoding-status');
+  status.textContent = `Placing ${flats.length} propert${flats.length > 1 ? 'ies' : 'y'} on map...`;
+
+  const bounds = new google.maps.LatLngBounds();
+  let placed = 0;
+
+  for (const flat of flats) {
+    const loc = await geocodeAddress(flat.address);
+    if (!loc) continue;
+    placed++;
+
+    const color = pinColor(flat.score);
+    const svg = markerSvg(color, flat.score);
+    const marker = new google.maps.Marker({
+      position: loc,
+      map: gmap,
+      title: flat.address,
+      icon: {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+        scaledSize: new google.maps.Size(44, 54),
+        anchor: new google.maps.Point(22, 52)
+      }
+    });
+
+    marker.addListener('click', () => openMapPanel(flat));
+    mapMarkers.push(marker);
+    bounds.extend(loc);
+  }
+
+  if (placed > 0) {
+    gmap.fitBounds(bounds);
+    if (placed === 1) gmap.setZoom(15);
+    status.textContent = '';
+  } else {
+    status.textContent = 'Could not place any properties — check addresses include a postcode';
+  }
+}
+
+function openMapPanel(flat) {
+  const price = flat.price ? '£' + parseInt(flat.price).toLocaleString() : '';
+  const sc = scColor(flat.score);
+  const content = document.getElementById('map-detail-content');
+  content.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:1rem;">
+      <div style="flex:1;">
+        <div style="font-size:16px;font-weight:500;line-height:1.3;">${flat.address}</div>
+        <div style="font-size:13px;color:var(--text3);margin-top:4px;">${[price, flat.beds ? flat.beds + 'bed ' + flat.baths + 'bath' : '', flat.station ? flat.station + (flat.walk ? ' · ' + flat.walk + 'min' : '') : ''].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div style="padding:6px 12px;border-radius:var(--r);background:${sc.bg};color:${sc.tc};font-size:16px;font-weight:500;flex-shrink:0;">${flat.score || '—'}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;">
+      ${di('Tenure', flat.tenure)}${di('Lease years', flat.lease)}
+      ${di('Service charge', flat.scharge ? '£' + parseInt(flat.scharge).toLocaleString() + '/yr' : '')}
+      ${di('EWS1', flat.ews1)}${di('EPC', flat.epc)}${di('Council tax', flat.ctax)}
+      ${di('Commute', flat.commute ? flat.commute + ' min' : '')}
+      ${di('Agent', flat.agent)}
+    </div>
+    ${flat.impression ? `<div class="note-block"><div class="note-label">First impression</div><div class="note-text">${flat.impression}</div></div>` : ''}
+    ${flat.pros ? `<div class="note-block"><div class="note-label">Pros</div><div class="note-text">${flat.pros}</div></div>` : ''}
+    ${flat.cons ? `<div class="note-block"><div class="note-label">Cons</div><div class="note-text">${flat.cons}</div></div>` : ''}
+    ${flat.photos && flat.photos.length ? `<div style="margin-top:12px;"><div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em;">Photos</div><div class="photo-grid" style="margin-top:0;">${flat.photos.map(p => `<div class="photo-thumb"><img src="${p.url}" onclick="window.open('${p.url}','_blank')" style="cursor:pointer;" alt="Photo"></div>`).join('')}</div></div>` : ''}
+    <div style="display:flex;gap:8px;margin-top:1rem;">
+      <button onclick="loadFlat(flats.find(x=>x.id==${flat.id}));closeMapPanel();" style="flex:1;padding:10px;font-size:13px;font-weight:500;background:var(--text);color:var(--bg);border:none;border-radius:var(--r);cursor:pointer;">Edit viewing</button>
+      ${flat.link ? `<a href="${flat.link}" target="_blank" style="padding:10px 14px;font-size:13px;border-radius:var(--r);border:0.5px solid var(--border);background:var(--bg);color:var(--text2);text-decoration:none;display:flex;align-items:center;gap:4px;"><i class="ti ti-external-link" style="font-size:14px;"></i>Listing</a>` : ''}
+    </div>`;
+
+  document.getElementById('map-detail-panel').classList.add('open');
+  document.getElementById('map-overlay').classList.add('show');
+}
+
+function closeMapPanel() {
+  document.getElementById('map-detail-panel').classList.remove('open');
+  document.getElementById('map-overlay').classList.remove('show');
 }
 function buildGlossary(){
   const container=document.getElementById('gloss-content');
