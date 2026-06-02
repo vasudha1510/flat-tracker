@@ -775,7 +775,14 @@ async function renderMap() {
       }
     });
 
-    marker.addListener('click', () => openMapPanel(flat));
+    marker.addListener('click', () => {
+      if (selectedFlatId === flat.id) {
+        openMapPanel(flat);
+      } else {
+        // Tapping an unselected pin selects it first
+        highlightOnMap(flat);
+      }
+    });
     mapMarkers.push(marker);
     bounds.extend(loc);
   }
@@ -816,28 +823,85 @@ function renderMapList() {
   });
 }
 
+let selectedFlatId = null;
+
 function highlightOnMap(flat) {
   // Scroll map into view
-  document.getElementById('gmap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('gmap').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  // Highlight the row
-  document.querySelectorAll('.flat-row').forEach(r => r.style.background = '');
+  // If same flat tapped again, deselect
+  if (selectedFlatId === flat.id) { resetMapSelection(); return; }
+  selectedFlatId = flat.id;
+
+  // Highlight the row, reset others
+  document.querySelectorAll('[id^="map-row-"]').forEach(r => {
+    r.style.background = '';
+    r.style.borderColor = '';
+  });
   const row = document.getElementById('map-row-' + flat.id);
   if (row) { row.style.background = 'var(--green-bg)'; row.style.borderColor = 'var(--green-border)'; }
 
-  // Find the marker and animate it
-  const marker = mapMarkers.find(m => m.getTitle() === flat.address);
-  if (marker) {
-    gmap.panTo(marker.getPosition());
-    gmap.setZoom(15);
-    // Bounce animation
-    marker.setAnimation(google.maps.Animation.BOUNCE);
-    setTimeout(() => marker.setAnimation(null), 1400);
-    // Open detail panel after a short delay
-    setTimeout(() => openMapPanel(flat), 400);
-  } else {
-    // Not yet geocoded — open panel directly
-    openMapPanel(flat);
+  // Update all markers — enlarge selected, dim others
+  mapMarkers.forEach(m => {
+    const isSelected = m.getTitle() === flat.address;
+    const f = flats.find(x => x.address === m.getTitle());
+    const color = pinColor(f ? f.score : 0);
+    const svg = isSelected ? markerSvgSelected(color, f ? f.score : null) : markerSvgDimmed(color, f ? f.score : null);
+    m.setIcon({
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new google.maps.Size(isSelected ? 54 : 36, isSelected ? 66 : 44),
+      anchor: new google.maps.Point(isSelected ? 27 : 18, isSelected ? 64 : 42)
+    });
+    if (isSelected) { gmap.panTo(m.getPosition()); gmap.setZoom(15); }
+  });
+}
+
+function markerSvgSelected(color, score) {
+  const label = score ? score.toFixed(1) : '?';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="54" height="66" viewBox="0 0 54 66">
+    <filter id="s"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.35"/></filter>
+    <path filter="url(#s)" d="M27 2 C13 2 3 12 3 25 C3 42 27 64 27 64 C27 64 51 42 51 25 C51 12 41 2 27 2Z" fill="${color}" stroke="white" stroke-width="2.5"/>
+    <circle cx="27" cy="25" r="14" fill="white" opacity="0.95"/>
+    <text x="27" y="30" text-anchor="middle" font-size="11" font-weight="700" fill="${color}" font-family="-apple-system,sans-serif">${label}</text>
+  </svg>`;
+}
+
+function markerSvgDimmed(color, score) {
+  const label = score ? score.toFixed(1) : '?';
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 44 54">
+    <path d="M22 2 C11 2 3 10 3 21 C3 35 22 52 22 52 C22 52 41 35 41 21 C41 10 33 2 22 2Z" fill="${color}" opacity="0.35"/>
+    <circle cx="22" cy="21" r="12" fill="white" opacity="0.6"/>
+    <text x="22" y="25" text-anchor="middle" font-size="9" font-weight="600" fill="${color}" opacity="0.5" font-family="-apple-system,sans-serif">${label}</text>
+  </svg>`;
+}
+
+function resetMapSelection() {
+  selectedFlatId = null;
+
+  // Reset all rows
+  document.querySelectorAll('[id^="map-row-"]').forEach(r => {
+    r.style.background = '';
+    r.style.borderColor = '';
+  });
+
+  // Restore all markers to normal
+  mapMarkers.forEach(m => {
+    const f = flats.find(x => x.address === m.getTitle());
+    const color = pinColor(f ? f.score : 0);
+    const svg = markerSvg(color, f ? f.score : null);
+    m.setIcon({
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new google.maps.Size(44, 54),
+      anchor: new google.maps.Point(22, 52)
+    });
+  });
+
+  // Fit all markers back in view
+  if (mapMarkers.length > 0) {
+    const bounds = new google.maps.LatLngBounds();
+    mapMarkers.forEach(m => bounds.extend(m.getPosition()));
+    gmap.fitBounds(bounds);
+    if (mapMarkers.length === 1) gmap.setZoom(15);
   }
 }
 
@@ -876,6 +940,7 @@ function openMapPanel(flat) {
 function closeMapPanel() {
   document.getElementById('map-detail-panel').classList.remove('open');
   document.getElementById('map-overlay').classList.remove('show');
+  resetMapSelection();
 }
 function buildGlossary(){
   const container=document.getElementById('gloss-content');
