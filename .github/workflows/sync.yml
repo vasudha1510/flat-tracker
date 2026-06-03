@@ -1,0 +1,38 @@
+name: Sync flat tracker data
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync JSONBin to data.json
+        env:
+          JSONBIN_KEY: ${{ secrets.JSONBIN_KEY }}
+          JSONBIN_BIN_ID: ${{ secrets.JSONBIN_BIN_ID }}
+          WRITE_TOKEN: ${{ secrets.WRITE_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - << 'EOF'
+          import json, base64, urllib.request, os
+          key = os.environ['JSONBIN_KEY']
+          bid = os.environ['JSONBIN_BIN_ID']
+          tok = os.environ['WRITE_TOKEN']
+          repo = os.environ['REPO']
+          req = urllib.request.Request(f'https://api.jsonbin.io/v3/b/{bid}/latest', headers={'X-Master-Key': key})
+          data = json.loads(urllib.request.urlopen(req).read())
+          record = data.get('record', {})
+          encoded = base64.b64encode(json.dumps(record).encode()).decode()
+          sha = None
+          try:
+            r = urllib.request.Request(f'https://api.github.com/repos/{repo}/contents/data.json', headers={'Authorization': f'Bearer {tok}', 'Accept': 'application/vnd.github+json'})
+            sha = json.loads(urllib.request.urlopen(r).read()).get('sha')
+          except: pass
+          payload = {'message': 'Sync data', 'content': encoded, 'branch': 'main'}
+          if sha: payload['sha'] = sha
+          req2 = urllib.request.Request(f'https://api.github.com/repos/{repo}/contents/data.json', data=json.dumps(payload).encode(), headers={'Authorization': f'Bearer {tok}', 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json'}, method='PUT')
+          print('Done:', urllib.request.urlopen(req2).status)
+          EOF
