@@ -103,6 +103,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:var(--rl);font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
 #london-map{width:100%;border:0.5px solid var(--border);border-radius:var(--rl);}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 @media(max-width:520px){.g2,.g3{grid-template-columns:1fr;}.detail-grid{grid-template-columns:1fr;}.tabs{gap:4px;padding:8px;}.tab{padding:6px 10px;font-size:12px;}}
 </style>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCIMv0be6l0yhkAQxgUlbnjdg-RBed3mcc&libraries=places,geocoding&callback=initGoogleMaps" async defer></script>
@@ -380,8 +381,28 @@ async function saveAllToCloud() {
   }
 }
 
+async function syncToShared() {
+  const btn = document.getElementById('share-btn');
+  btn.innerHTML = '<i class="ti ti-loader-2" style="font-size:13px;animation:spin 1s linear infinite;"></i>Syncing...';
+  btn.disabled = true;
+  try {
+    await writeGitHubData();
+    btn.innerHTML = '<i class="ti ti-circle-check" style="font-size:13px;color:var(--green-text);"></i>Synced!';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="ti ti-share" style="font-size:13px;"></i>Sync shared';
+      btn.disabled = false;
+    }, 2500);
+  } catch(e) {
+    btn.innerHTML = '<i class="ti ti-alert-circle" style="font-size:13px;color:var(--red-text);"></i>Failed';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="ti ti-share" style="font-size:13px;"></i>Sync shared';
+      btn.disabled = false;
+    }, 2500);
+  }
+}
+
 async function writeGitHubData() {
-  const token = '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';
+  const token = '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';
   const repo = 'vasudha1510/flat-tracker';
   const url = `https://api.github.com/repos/${repo}/contents/data.json`;
   const body = JSON.stringify({ viewings: flats, lenders });
@@ -629,7 +650,7 @@ async function saveFlat(){
   try{
     if(editingId){flats=flats.map(x=>x.id===editingId?flat:x);}else{flats.push(flat);}
     await saveAllToCloud();
-    editingId=null;updateAll();clearForm();showTab('viewings');showToast('Viewing saved ✓');
+    editingId=null;updateAll();clearForm();showTab('viewings');showToast('Viewing saved ✓');syncToShared();
   }catch(e){if(editingId)flats=flats.map(x=>x.id===editingId?x:x);else flats.pop();}
   btn.disabled=false;btn.textContent=editingId?'Update viewing':'Save viewing';
 }
