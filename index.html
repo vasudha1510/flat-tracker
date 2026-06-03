@@ -350,6 +350,8 @@ async function loadFromCloud() {
     setSyncStatus('synced', 'Synced ✓');
     updateAll();
     renderLenders();
+    // Sync to GitHub so shared page stays current
+    writeGitHubData().catch(()=>{});
   } catch (e) {
     setSyncStatus('error', 'Offline');
     try {
@@ -370,11 +372,30 @@ async function saveAllToCloud() {
     await jbRequest('PUT', '/b/' + id, { viewings: flats, lenders });
     setSyncStatus('synced', 'Saved ✓');
     localStorage.setItem('flt_backup', JSON.stringify({ viewings: flats, lenders }));
+    writeGitHubData().catch(()=>{});
   } catch (e) {
     setSyncStatus('error', 'Save failed');
     showToast('Could not save — check your connection');
     throw e;
   }
+}
+
+async function writeGitHubData() {
+  const token = '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';
+  const repo = 'vasudha1510/flat-tracker';
+  const url = `https://api.github.com/repos/${repo}/contents/data.json`;
+  const body = JSON.stringify({ viewings: flats, lenders });
+  const encoded = btoa(unescape(encodeURIComponent(body)));
+  let sha = null;
+  try {
+    const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' } });
+    if (r.ok) { const d = await r.json(); sha = d.sha; }
+  } catch(_) {}
+  await fetch(url, {
+    method: 'PUT',
+    headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: 'Update flat tracker data', content: encoded, branch: 'main', ...(sha ? {sha} : {}) })
+  });
 }
 
 // ─── CLOUDINARY PHOTO UPLOAD ───
