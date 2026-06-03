@@ -119,24 +119,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <script>
-const JSONBIN_KEY = '$2a$10$5jwn8B78EB7Wb84e0nxJa.HKVM5Bg8hhnE8sadWbMJTxZWgHzBEFm';
-const BIN_ID = '6a10ff636877513b27b9d70c';
 let flats = [];
 let gmap = null, geocoder = null, mapMarkers = [], selectedFlatId = null;
 let geocodeCache = JSON.parse(localStorage.getItem('geocode_cache') || '{}');
 
 async function loadData() {
   try {
-    const res = await fetch('https://api.jsonbin.io/v3/b/' + BIN_ID + '/latest', {
-      headers: {'X-Master-Key': JSONBIN_KEY}
-    });
-    if (!res.ok) throw new Error('fetch failed');
+    const url = 'https://raw.githubusercontent.com/vasudha1510/flat-tracker/main/data.json?t=' + Date.now();
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    flats = data.record.viewings || [];
+    flats = data.viewings || [];
     document.getElementById('sync-label').textContent = flats.length + ' viewing' + (flats.length !== 1 ? 's' : '');
     renderAll();
   } catch(e) {
-    document.getElementById('sync-label').textContent = 'Offline';
+    document.getElementById('sync-label').textContent = 'No data yet';
     console.error('Load failed:', e);
   }
 }
